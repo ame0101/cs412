@@ -1,72 +1,85 @@
+
 body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
+    font-family: 'Roboto', sans-serif;
+    background-color: #fbe9d0;
+    color: #5c3d2e; 
     margin: 0;
     padding: 0;
-}
-
-header {
-    background-color: #333;
-    color: #fff;
-    padding: 1rem;
-}
-
-nav ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-nav ul li {
-    display: inline;
-    margin-right: 10px;
-}
-
-nav ul li a {
-    color: #fff;
-    text-decoration: none;
-}
-
-main {
-    padding: 2rem;
-}
-
-footer {
-    background-color: #333;
-    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     text-align: center;
-    padding: 1rem;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
 }
 
 form {
-    max-width: 500px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    width: 50%;
     margin: 0 auto;
+}
+
+h1, h2 {
+    color: #5c3d2e; 
+    text-align: center;
 }
 
 label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+    color: #5c3d2e;
 }
 
-input[type="text"],
-input[type="tel"],
-input[type="email"],
-textarea {
+input[type="text"], input[type="tel"], input[type="email"], textarea, select {
     width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    color: #5c3d2e;
 }
 
-input[type="submit"] {
-    background-color: #333;
-    color: #fff;
+input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+textarea {
+    height: 100px;
+    resize: none;
+}
+
+button[type="submit"] {
+    display: block;
+    width: 100%;
+    background-color: #5c3d2e; /* Dark brown */
+    color: white;
+    padding: 10px;
     border: none;
-    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 1.2rem;
     cursor: pointer;
+    font-family: 'Caveat', cursive;
 }
 
-input[type="submit"]:hover {
-    background-color: #555;
+button[type="submit"]:hover {
+    background-color: #4e3224;  
+}
+
+@media (max-width: 768px) {
+    form {
+        width: 90%;
+    }
+
+    input[type="text"], input[type="tel"], input[type="email"], textarea, select {
+        font-size: 0.9rem;
+    }
+
+    button[type="submit"] {
+        font-size: 1rem;
+    }
 }
