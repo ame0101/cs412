@@ -42,10 +42,4 @@ def confirmation(request):
             'name': name,
             'phone': phone,
             'email': email,
-            'special_instructions': special_instructions,
-            'ready_time': ready_time.strftime("%I:%M %p")
-        }
-
-        return render(request, 'confirmation.html', context)
-    else:
-        return redirect('order')
+            'special_instructi
