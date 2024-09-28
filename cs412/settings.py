@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-i$1es9vy81w*0-*m!g**ko6lx((=&m*l7buzio9@ifknuq_0^0"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -46,10 +46,10 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 
-
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # This is where your static files are located
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # This is where `collectstatic` will store files
+
 
 STATIC_HOST = os.environ.get("DJANGO_STATIC_HOST", "")
 
