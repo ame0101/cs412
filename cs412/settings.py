@@ -73,10 +73,9 @@ ROOT_URLCONF = "cs412.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, 'templates')],  # Add the global templates directory
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],  
         "APP_DIRS": True,
         "OPTIONS": {
-            'string_if_invalid': 'WARNING: {{%s}} is not a valid context variable.',
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",

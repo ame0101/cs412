@@ -3,10 +3,11 @@ from datetime import datetime, timedelta
 import random
 
 def main(request):
-    return render(request, 'main.html')
+    return render(request, 'restaurant/main.html')
 
 def main_view(request):
-    return render(request, 'main.html') 
+    return render(request, 'restaurant/main.html') 
+
 
 def order_view(request):
     specials = [
@@ -18,7 +19,7 @@ def order_view(request):
     context = {
         'daily_special': daily_special
     }
-    return render(request, 'order.html', context)
+    return render(request, 'restaurant/order.html', context)
 
 def confirmation(request):
     if request.method == 'POST':
@@ -46,6 +47,6 @@ def confirmation(request):
             'ready_time': ready_time.strftime("%I:%M %p")
         }
 
-        return render(request, 'confirmation.html', context)
+        return render(request, 'restaurant/confirmation.html', context)
     else:
         return redirect('order')
