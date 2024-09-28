@@ -22,9 +22,10 @@ from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('restaurant/', include('restaurant.urls')),
-    path('', RedirectView.as_view(url='/restaurant/main/', permanent=True)),
-] + static(settings.STATIC_URL,
-           document_root=settings.STATIC_ROOT) 
+    path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico')),
+
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
