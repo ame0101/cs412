@@ -56,40 +56,4 @@ header nav ul li a:hover {
 }
 
  footer {
-    width: 100%;
-    background-color: #5c3d2e;
-    color: #fbe9d0;
-    position: fixed;
-    bottom: 0;
-    text-align: center;
-}
-
- button {
-    background-color: #5c3d2e;
-    color: #fbe9d0;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.2rem;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #4e3224; 
-}
-
-
-@media (max-width: 768px) {
-    main {
-        width: 90%;
-    }
-
-    header nav ul li {
-        margin-right: 10px;
-    }
-
-    button {
-        width: 100%;
-        font-size: 1rem;
-    }
-}
+    width: 100%

@@ -18,7 +18,7 @@ def order_view(request):
     context = {
         'daily_special': daily_special
     }
-    return render(request, 'restaurant/order.html', context)
+    return render(request, 'order.html', context)
 
 def confirmation(request):
     if request.method == 'POST':
