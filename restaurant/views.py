@@ -5,7 +5,10 @@ import random
 def main(request):
     return render(request, 'main.html')
 
-def order(request):
+def main_view(request):
+    return render(request, 'main.html') 
+
+def order_view(request):
     specials = [
         {'name': 'Mofongo', 'price': 10.99},
         {'name': 'Chicharrón de Pollo', 'price': 12.99},
@@ -15,7 +18,7 @@ def order(request):
     context = {
         'daily_special': daily_special
     }
-    return render(request, 'order.html', context)
+    return render(request, 'restaurant/order.html', context)
 
 def confirmation(request):
     if request.method == 'POST':

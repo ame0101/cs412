@@ -21,11 +21,13 @@ from django.urls import path, include
 from django.views.generic import RedirectView  
 from django.conf import settings
 from django.conf.urls.static import static
+from restaurant import views
+
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('restaurant/', include('restaurant.urls')),
-    path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico')),
+
+    path("admin/", admin.site.urls),
+    path("restaurant/", include('restaurant.urls')),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
