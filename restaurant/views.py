@@ -26,17 +26,25 @@ def confirmation(request):
         order_items = []
         total_price = 0
 
-        if request.POST.get('daily_special'):
+        # Handle daily special fields
+        if request.POST.get('daily_special_name') and request.POST.get('daily_special_price'):
             order_items.append(request.POST.get('daily_special_name'))
-            total_price += float(request.POST.get('daily_special_price'))
+            try:
+                total_price += float(request.POST.get('daily_special_price'))
+            except ValueError:
+                # Handle the case where the price is not a valid number
+                total_price += 0
 
+        # Get other form fields
         name = request.POST.get('name')
         phone = request.POST.get('phone')
         email = request.POST.get('email')
         special_instructions = request.POST.get('special_instructions')
 
+        # Calculate the ready time
         ready_time = datetime.now() + timedelta(minutes=random.randint(30, 60))
 
+        # Create the context for the confirmation page
         context = {
             'order_items': order_items,
             'total_price': total_price,

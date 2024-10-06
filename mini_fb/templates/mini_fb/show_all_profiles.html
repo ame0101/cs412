@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>All Profiles</h1>
+<table>
+    <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>City</th>
+        <th>Image</th>
+    </tr>
+    {% for profile in profiles %}
+    <tr>
+        <td>{{ profile.first_name }}</td>
+        <td>{{ profile.last_name }}</td>
+        <td>{{ profile.city }}</td>
+        <td><img src="{{ profile.profile_image_url }}" alt="{{ profile.first_name }}" width="50"></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
