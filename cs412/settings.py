@@ -71,12 +71,13 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "cs412.urls"
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -88,8 +89,6 @@ TEMPLATES = [
         },
     },
 ]
-
-
 WSGI_APPLICATION = "cs412.wsgi.application"
 
 
