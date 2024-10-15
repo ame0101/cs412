@@ -10,6 +10,13 @@
 <body>
     <header>
         <h1>Mini Facebook</h1>
+        <nav>
+            
+            <div class="button-container">
+                <a href="{% url 'show_all_profiles' %}" class="button button-all-profiles">All Profiles</a>
+                <a href="{% url 'create_profile' %}" class="button button-create-profile">Create New Profile</a>
+            </div>
+        </nav>
     </header>
     
     <main>

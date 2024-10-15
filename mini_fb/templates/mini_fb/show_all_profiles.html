@@ -10,7 +10,7 @@
         <th>Image</th>
     </tr>
     {% for profile in profiles %}
-    <tr>
+    <tr class="profile-row" onclick="window.location='{% url "show_profile" profile.pk %}';">
         <td>{{ profile.first_name }}</td>
         <td>{{ profile.last_name }}</td>
         <td>{{ profile.city }}</td>
@@ -18,4 +18,15 @@
     </tr>
     {% endfor %}
 </table>
+{% endblock %}
+
+{% block css %}
+<style>
+    .profile-row {
+        cursor: pointer;
+    }
+    .profile-row:hover {
+        background-color: #f5f5f5;
+    }
+</style>
 {% endblock %}
