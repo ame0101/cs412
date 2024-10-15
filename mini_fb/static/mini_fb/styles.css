@@ -38,7 +38,6 @@ img {
     border-radius: 50%;
 }
 
-/* Profile page styles */
 .profile-container {
     max-width: 600px;
     margin: 20px auto;
@@ -70,22 +69,6 @@ img {
     border-top: 1px solid #ddd;
 }
 
-.back-button {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #1877f2;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-.back-button:hover {
-    background-color: #166fe5;
-}
-
-/* New styles for forms */
 form {
     max-width: 500px;
     margin: 20px auto;
@@ -128,7 +111,6 @@ form button[type="submit"]:hover {
     background-color: #166fe5;
 }
 
-/* Status message styles */
 .status-messages {
     margin-top: 20px;
 }
@@ -150,7 +132,6 @@ form button[type="submit"]:hover {
     color: #888;
 }
 
-/* Navigation styles */
 nav {
     background-color: #1877f2;
     padding: 10px;
@@ -180,29 +161,9 @@ nav ul li a:hover {
     color: #ddd;
 }
 
-/* Button styles */
-.button {
+.button, .back-button {
     display: inline-block;
     padding: 10px 20px;
-    background-color: #1877f2;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-.button:hover {
-    background-color: #166fe5;
-}
-
-
-
-
-
-.button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #1877f2;
     color: white;
     text-decoration: none;
     border-radius: 5px;
@@ -216,58 +177,6 @@ nav ul li a:hover {
     background-color: #166fe5;
 }
 
-
-.button-create-status {
-    background-color: #166fe5;
-}
-
-.button-create-status:hover {
-    background-color: #166fe5;
-}
-
-.button-all-profiles {
-    background-color: #1877f2;
-}
-
-.button-all-profiles:hover {
-    background-color: #166fe5;
-}
-
-.button-create-profile {
-    background-color: #00008B;
-}
-
-.button-create-profile:hover {
-    background-color: #00008B;
-}
-
-
-.button-container {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin: 20px 0;
-}
-
-
-.button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #ffffff;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-    font-weight: bold;
-    text-align: center;
-    margin: 5px;
-}
-
-.button:hover {
-    background-color: #166fe5;
-}
-
-/* Specific button styles */
 .button-create-status {
     background-color: #051e40;
 }
@@ -292,36 +201,17 @@ nav ul li a:hover {
     background-color: #166fe5;
 }
 
-.button-back-to-profile {
+.button-back-to-profile, .back-button {
     background-color: #6c757d;
 }
 
-.button-back-to-profile:hover {
+.button-back-to-profile:hover, .back-button:hover {
     background-color: #5a6268;
 }
-
 
 .button-container {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     margin: 20px 0;
-}
-
-
-.back-button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #6c757d;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-    font-weight: bold;
-    text-align: center;
-    margin: 5px;
-}
-
-.back-button:hover {
-    background-color: #5a6268;
 }
