@@ -215,3 +215,96 @@ nav ul li a:hover {
     flex-wrap: wrap;
     margin: 20px 0;
 }
+
+.status-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.button-update, .button-delete {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    margin-left: 10px;
+}
+
+.button-update {
+    background-color: #75cac3;
+}
+
+.button-update:hover {
+    background-color: #75cac3;
+}
+
+.button-delete {
+    background-color: #6a9fee;
+}
+
+.button-delete:hover {
+    background-color: #6a9fee;
+}
+
+.status-message img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.button-update-profile {
+    background-color: #75cac3;
+}
+
+.button-update-profile:hover {
+    background-color: #75cac3;
+}
+
+.delete-confirmation {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.delete-confirmation p {
+    margin-bottom: 20px;
+}
+
+.delete-confirmation .button-container {
+    display: flex;
+    justify-content: center;
+}
+
+.delete-confirmation .button {
+    margin: 0 10px;
+}
+
+.update-status-form {
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+.update-status-form textarea {
+    width: 100%;
+    height: 100px;
+    resize: vertical;
+}
+
+@media (max-width: 600px) {
+    .profile-container {
+        padding: 10px;
+    }
+
+    .button {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .status-actions {
+        flex-direction: column;
+    }
+
+    .button-update, .button-delete {
+        margin-left: 0;
+        margin-top: 5px;
+    }
+}

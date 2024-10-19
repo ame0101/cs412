@@ -13,3 +13,15 @@ class CreateStatusMessageForm(forms.ModelForm):
         widgets = {
             'message': forms.Textarea(attrs={'rows': 3}),
         }
+
+class UpdateProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['city', 'email_address', 'profile_image_url']
+
+
+
+class UpdateStatusMessageForm(forms.ModelForm):
+    class Meta:
+        model = StatusMessage
+        fields = ['message']
