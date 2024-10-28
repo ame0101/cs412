@@ -1,0 +1,25 @@
+{% extends "mini_fb/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="profile-container">
+    <h1>{{ profile.first_name }} {{ profile.last_name }}'s News Feed</h1>
+
+    {% for message in news_feed %}
+        <div class="status-message">
+            <p><strong>{{ message.timestamp|date:"F j, Y, g:i a" }}</strong>: {{ message.message }}</p>
+            {% for img in message.get_images %}
+                <img src="{{ img.image_file.url }}" alt="Status image" class="status-image">
+            {% endfor %}
+            <div class="status-actions">
+                <a href="{% url 'update_status' message.pk %}" class="button button-update">Edit</a>
+                <a href="{% url 'delete_status' message.pk %}" class="button button-delete">Delete</a>
+            </div>
+        </div>
+    {% empty %}
+        <p>No status messages to display.</p>
+    {% endfor %}
+
+    <a href="{% url 'show_profile' profile.id %}" class="back-button">Back to Profile</a>
+</div>
+{% endblock %}

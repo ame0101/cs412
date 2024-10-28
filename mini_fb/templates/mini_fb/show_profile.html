@@ -1,4 +1,5 @@
 {% extends "mini_fb/base.html" %}
+{% load static %}
 
 {% block content %}
 <div class="profile-container">
@@ -8,18 +9,29 @@
         <img src="{{ profile.profile_image_url }}" alt="{{ profile.first_name }}'s profile picture">
     </div>
 
+    <div class="profile-details">
+        <p><strong>First Name:</strong> {{ profile.first_name }}</p>
+        <p><strong>Last Name:</strong> {{ profile.last_name }}</p>
+        <p><strong>City:</strong> {{ profile.city }}</p>
+        {% if profile.email_address %}
+            <p><strong>Email:</strong> {{ profile.email_address }}</p>
+        {% endif %}
+    </div>
+    
     <h2>Status Messages</h2>
     {% for status in profile.statusmessage_set.all %}
         <div class="status-message">
-            <p>{{ status.timestamp }}: {{ status.message }}</p>
+            <p>{{ status.timestamp|date:"F j, Y, g:i a" }}: {{ status.message }}</p>
             {% for img in status.get_images %}
-                <img src="{{ img.image_file.url }}" alt="Status image" style="max-width: 300px;">
+                <img src="{{ img.image_file.url }}" alt="Status image" class="status-image">
             {% endfor %}
             <div class="status-actions">
                 <a href="{% url 'update_status' status.pk %}" class="button button-update">Update</a>
                 <a href="{% url 'delete_status' status.pk %}" class="button button-delete">Delete</a>
             </div>
         </div>
+    {% empty %}
+        <p>No status messages to display.</p>
     {% endfor %}
 
     <div class="button-container">
@@ -27,30 +39,39 @@
         <a href="{% url 'update_profile' profile.pk %}" class="button button-update-profile">Update Profile</a>
     </div>
     
-    <div class="profile-details">
-        <p><strong>First Name:</strong> {{ profile.first_name }}</p>
-        <p><strong>Last Name:</strong> {{ profile.last_name }}</p>
-        <p><strong>City:</strong> {{ profile.city }}</p>
-        {% if profile.email %}
-            <p><strong>Email:</strong> {{ profile.email }}</p>
-        {% endif %}
-        {% if profile.birth_date %}
-            <p><strong>Birth Date:</strong> {{ profile.birth_date }}</p>
-        {% endif %}
-        {% if profile.homepage_url %}
-            <p><strong>Homepage:</strong> <a href="{{ profile.homepage_url }}" target="_blank">{{ profile.homepage_url }}</a></p>
-        {% endif %}
-    </div>
-    
-    {% if profile.bio %}
-    <div class="profile-bio">
-        <h2>About Me</h2>
-        <p>{{ profile.bio }}</p>
-    </div>
+    <h2>Friends</h2>
+    {% if friends %}
+        <ul class="friends-list">
+            {% for friend in friends %}
+                <li>
+                    <a href="{% url 'show_profile' friend.pk %}">
+                        {{ friend.first_name }} {{ friend.last_name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No friends added yet.</p>
     {% endif %}
+
+    {% include 'mini_fb/friend_suggestions.html' %}
     
-  
+    <h2>News Feed</h2>
+    {% if news_feed %}
+        <ul class="news-feed">
+            {% for message in news_feed %}
+                <li class="news-feed-item">
+                    <p><strong>{{ message.timestamp|date:"F j, Y, g:i a" }}</strong>: {{ message.message }}</p>
+                    {% for img in message.get_images %}
+                        <img src="{{ img.image_file.url }}" alt="Status image" class="news-feed-image">
+                    {% endfor %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No updates to display in the news feed.</p>
+    {% endif %}
+
     <a href="{% url 'show_all_profiles' %}" class="back-button">Back to All Profiles</a>
 </div>
 {% endblock %}
-   

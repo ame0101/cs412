@@ -1,3 +1,5 @@
+/* mini_fb/static/mini_fb/css/styles.css */
+
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -9,6 +11,12 @@ body {
 h1 {
     color: #1877f2;
     text-align: center;
+}
+
+h2 {
+    color: #1877f2;
+    margin-top: 30px;
+    margin-bottom: 15px;
 }
 
 table {
@@ -39,12 +47,12 @@ img {
 }
 
 .profile-container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 20px auto;
-    padding: 20px;
+    padding: 30px;
     background-color: white;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
 }
 
 .profile-image {
@@ -57,53 +65,59 @@ img {
     height: 200px;
     object-fit: cover;
     border-radius: 50%;
+    border: 4px solid #1877f2;
 }
 
 .profile-details p {
     margin: 10px 0;
+    font-size: 1.1em;
 }
 
 .profile-bio {
     margin-top: 20px;
     padding-top: 20px;
     border-top: 1px solid #ddd;
+    font-style: italic;
 }
 
 form {
-    max-width: 500px;
-    margin: 20px auto;
-    padding: 20px;
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 25px;
     background-color: white;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
 }
 
 form label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-weight: bold;
+    color: #333;
 }
 
 form input[type="text"],
 form input[type="email"],
 form textarea {
     width: 100%;
-    padding: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
     box-sizing: border-box;
+    font-size: 1em;
 }
 
 form button[type="submit"] {
     display: block;
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     background-color: #1877f2;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 1.1em;
     transition: background-color 0.3s;
 }
 
@@ -112,30 +126,34 @@ form button[type="submit"]:hover {
 }
 
 .status-messages {
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
 .status-message {
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
 }
 
 .status-message p {
-    margin: 0;
+    margin: 0 0 10px 0;
+    font-size: 1em;
+    color: #333;
 }
 
 .status-message .timestamp {
-    font-size: 0.8em;
+    font-size: 0.85em;
     color: #888;
 }
 
 nav {
     background-color: #1877f2;
-    padding: 10px;
-    margin-bottom: 20px;
+    padding: 15px;
+    margin-bottom: 25px;
+    border-radius: 5px;
 }
 
 nav ul {
@@ -147,13 +165,14 @@ nav ul {
 }
 
 nav ul li {
-    margin: 0 10px;
+    margin: 0 15px;
 }
 
 nav ul li a {
     color: white;
     text-decoration: none;
     font-weight: bold;
+    font-size: 1.05em;
     transition: color 0.3s;
 }
 
@@ -163,7 +182,7 @@ nav ul li a:hover {
 
 .button, .back-button {
     display: inline-block;
-    padding: 10px 20px;
+    padding: 12px 25px;
     color: white;
     text-decoration: none;
     border-radius: 5px;
@@ -171,10 +190,19 @@ nav ul li a:hover {
     font-weight: bold;
     text-align: center;
     margin: 5px;
+    font-size: 1em;
 }
 
 .button:hover {
     background-color: #166fe5;
+}
+
+.back-button {
+    background-color: #6c757d;
+}
+
+.back-button:hover {
+    background-color: #5a6268;
 }
 
 .button-create-status {
@@ -182,7 +210,7 @@ nav ul li a:hover {
 }
 
 .button-create-status:hover {
-    background-color: #051e40;
+    background-color: #040f30;
 }
 
 .button-all-profiles {
@@ -190,7 +218,7 @@ nav ul li a:hover {
 }
 
 .button-all-profiles:hover {
-    background-color: #051e40;
+    background-color: #166fe5;
 }
 
 .button-create-profile {
@@ -198,7 +226,7 @@ nav ul li a:hover {
 }
 
 .button-create-profile:hover {
-    background-color: #166fe5;
+    background-color: #040f30;
 }
 
 .button-back-to-profile, .back-button {
@@ -223,9 +251,13 @@ nav ul li a:hover {
 }
 
 .button-update, .button-delete {
-    padding: 5px 10px;
-    font-size: 0.9em;
+    padding: 8px 15px;
+    font-size: 0.95em;
     margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 .button-update {
@@ -233,7 +265,7 @@ nav ul li a:hover {
 }
 
 .button-update:hover {
-    background-color: #75cac3;
+    background-color: #66b2b0;
 }
 
 .button-delete {
@@ -241,7 +273,7 @@ nav ul li a:hover {
 }
 
 .button-delete:hover {
-    background-color: #6a9fee;
+    background-color: #5883c7;
 }
 
 .status-message img {
@@ -251,60 +283,116 @@ nav ul li a:hover {
     margin-top: 10px;
 }
 
-.button-update-profile {
-    background-color: #75cac3;
+.news-feed {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
 }
 
-.button-update-profile:hover {
-    background-color: #75cac3;
+.news-feed-item {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
 }
 
-.delete-confirmation {
-    text-align: center;
-    margin-top: 20px;
+.news-feed-item p {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #333;
 }
 
-.delete-confirmation p {
-    margin-bottom: 20px;
+.news-feed-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-top: 10px;
 }
 
-.delete-confirmation .button-container {
+
+.friends-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.friends-list li {
     display: flex;
-    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
 
-.delete-confirmation .button {
-    margin: 0 10px;
+.friend-image {
+    margin-right: 15px;
 }
 
-.update-status-form {
-    max-width: 500px;
-    margin: 20px auto;
+.friend-image img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #1877f2;
 }
 
-.update-status-form textarea {
-    width: 100%;
-    height: 100px;
-    resize: vertical;
+
+
+.friends-list a:hover {
+    color: white;
+    text-decoration: none;
 }
 
-@media (max-width: 600px) {
-    .profile-container {
-        padding: 10px;
-    }
 
-    .button {
-        display: block;
-        width: 100%;
-        margin-bottom: 10px;
-    }
+.friends-list a {
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: bold;
+    flex-grow: 1; 
+    margin-right: 10px;
+}
 
-    .status-actions {
-        flex-direction: column;
-    }
+.button-add-friend {
+    background-color: #008CBA;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    font-size: 0.95em;
+}
 
-    .button-update, .button-delete {
-        margin-left: 0;
-        margin-top: 5px;
-    }
+.button-add-friend:hover {
+    background-color: #005f6a;
+    color: white;
+}
+
+
+
+
+.friends-list a:not(.button-add-friend) {
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: bold;
+    flex-grow: 1; 
+    margin-right: 10px;
+}
+
+.friends-list a.button-add-friend {
+    background-color: #1877f2;
+    color: white;
+    padding: 8px 6px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    font-size: 0.95em;
+}
+
+.friends-list a.button-add-friend:hover {
+    background-color: #005f6a;
+    color: white;
 }
