@@ -4,10 +4,10 @@
 <h2>Create New Profile</h2>
 <form method="POST">
     {% csrf_token %}
+    <h3>User Registration</h3>
+    {{ user_form.as_p }}
+    <h3>Profile Information</h3>
     {{ form.as_p }}
-    <label for="id_email_address">Email Address:</label>
-    <input type="email" name="email_address" id="id_email_address" required>
     <button type="submit">Create Profile</button>
 </form>
 {% endblock %}
-

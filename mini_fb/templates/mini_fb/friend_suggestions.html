@@ -9,7 +9,8 @@
                 <a href="{% url 'show_profile' suggestion.pk %}">
                     {{ suggestion.first_name }} {{ suggestion.last_name }}
                 </a>
-                <a href="{% url 'add_friend' profile.pk suggestion.pk %}" class="button button-add-friend">Add Friend</a>
+                <a href="{% url 'add_friend' suggestion.pk %}" class="button button-add-friend">Add Friend</a>
+
             </li>
         {% endfor %}
     </ul>

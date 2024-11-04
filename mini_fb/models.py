@@ -2,13 +2,15 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User  # Import the User model
 
 class Profile(models.Model):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    city = models.CharField(max_length=100)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    city = models.CharField(max_length=50)
+    email_address = models.EmailField(max_length=50)
     profile_image_url = models.URLField(max_length=200)
-    email_address = models.EmailField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

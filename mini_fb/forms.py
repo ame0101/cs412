@@ -1,5 +1,6 @@
 from django import forms
 from .models import Profile, StatusMessage
+from django.contrib.auth.forms import UserCreationForm
 
 class CreateProfileForm(forms.ModelForm):
     class Meta:
@@ -25,3 +26,8 @@ class UpdateStatusMessageForm(forms.ModelForm):
     class Meta:
         model = StatusMessage
         fields = ['message']
+
+class CreateProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['first_name', 'last_name', 'city', 'profile_image_url', 'email_address']
