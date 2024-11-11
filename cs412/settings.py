@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     "restaurant",
     "whitenoise.runserver_nostatic",
     "mini_fb",
-    "voter_analytics",
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
