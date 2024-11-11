@@ -31,6 +31,7 @@ urlpatterns = [
     path("restaurant/", include('restaurant.urls')),
     path('mini_fb/', include('mini_fb.urls')),  
     path('', include('mini_fb.urls')),  
+        path('voter_analytics/', include('voter_analytics.urls')),
 
     path('', views.main_view, name='home'), 
 

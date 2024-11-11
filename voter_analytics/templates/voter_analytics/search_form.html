@@ -1,0 +1,49 @@
+<!-- templates/voter_analytics/search_form.html -->
+<form method="get" action="">
+    <!-- Party Affiliation -->
+    <label for="party_affiliation">Party Affiliation:</label>
+    <select name="party_affiliation" id="party_affiliation">
+        <option value="">Any</option>
+        {% for party in party_affiliations %}
+        <option value="{{ party }}" {% if request.GET.party_affiliation == party %}selected{% endif %}>{{ party }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Minimum Date of Birth -->
+    <label for="min_dob">Born After:</label>
+    <select name="min_dob" id="min_dob">
+        <option value="">Any</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if request.GET.min_dob == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Maximum Date of Birth -->
+    <label for="max_dob">Born Before:</label>
+    <select name="max_dob" id="max_dob">
+        <option value="">Any</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if request.GET.max_dob == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Voter Score -->
+    <label for="voter_score">Voter Score:</label>
+    <select name="voter_score" id="voter_score">
+        <option value="">Any</option>
+        {% for score in voter_scores %}
+        <option value="{{ score }}" {% if request.GET.voter_score == score|stringformat:"s" %}selected{% endif %}>{{ score }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Elections Voted In -->
+    <fieldset>
+        <legend>Voted in Elections:</legend>
+        {% for election in elections %}
+        <input type="checkbox" name="{{ election }}" id="{{ election }}" {% if request.GET.election %}checked{% endif %}>
+        <label for="{{ election }}">{{ election }}</label>
+        {% endfor %}
+    </fieldset>
+
+    <button type="submit">Filter</button>
+</form>
