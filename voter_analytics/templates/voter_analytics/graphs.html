@@ -1,0 +1,22 @@
+<!-- templates/voter_analytics/graphs.html -->
+{% extends 'voter_analytics/base.html' %}
+
+{% block title %}Voter Analytics Graphs{% endblock %}
+
+{% block content %}
+    <h2>Voter Analytics Graphs</h2>
+
+    <!-- Include the search form -->
+    {% include 'voter_analytics/search_form.html' %}
+
+    <!-- Display the graphs -->
+    <div>
+        {{ birth_year_histogram|safe }}
+    </div>
+    <div>
+        {{ party_affiliation_pie_chart|safe }}
+    </div>
+    <div>
+        {{ election_participation_bar_chart|safe }}
+    </div>
+{% endblock %}

@@ -1,0 +1,179 @@
+/* Base styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f7fa;
+    color: #2d3748;
+  }
+  
+  h1, h2 {
+    color: #1a365d;
+    margin-bottom: 1.5rem;
+  }
+  
+  h1 {
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  /* Form styles */
+  form {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+  }
+  
+  label {
+    display: inline-block;
+    margin: 0.5rem 1rem 0.5rem 0;
+    font-weight: 500;
+  }
+  
+  select {
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    margin-right: 1.5rem;
+    background-color: white;
+    min-width: 120px;
+  }
+  
+  select:focus {
+    border-color: #4299e1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+  }
+  
+  button[type="submit"] {
+    background-color: #4299e1;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 1rem;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #3182ce;
+  }
+  
+  /* Checkbox groups */
+  form > div {
+    margin: 0.75rem 0;
+  }
+  
+  input[type="checkbox"] {
+    margin-right: 0.5rem;
+  }
+  
+  /* Voter list styles */
+  p {
+    background: white;
+    padding: 1rem;
+    border-radius: 6px;
+    margin: 0.5rem 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  
+  a {
+    color: #4299e1;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Pagination styles */
+  .pagination {
+    margin: 2rem 0;
+    text-align: center;
+  }
+  
+  .step-links {
+    background: white;
+    padding: 0.75rem;
+    border-radius: 6px;
+    display: inline-block;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  
+  .step-links a {
+    padding: 0.25rem 0.75rem;
+    margin: 0 0.25rem;
+    border-radius: 4px;
+  }
+  
+  .step-links a:hover {
+    background-color: #ebf8ff;
+    text-decoration: none;
+  }
+  
+  .current {
+    padding: 0.25rem 0.75rem;
+    color: #2d3748;
+  }
+  
+  /* Graph container styles */
+  div[style*="width: 600px"] {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin: 1.5rem 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Voter detail styles */
+  ul {
+    list-style: none;
+    padding: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin: 1.5rem 0;
+  }
+  
+  ul li {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  ul li:last-child {
+    border-bottom: none;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+  
+    form {
+        padding: 1rem;
+    }
+  
+    select {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+  
+    div[style*="width: 600px"] {
+        width: 100% !important;
+        padding: 0.5rem;
+    }
+  
+    .step-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+  }
