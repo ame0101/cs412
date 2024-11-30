@@ -1,5 +1,16 @@
-*.pyc
+# Python cache
 __pycache__/
-.DS_Store
+*.pyc
+
+# SQLite database
 db.sqlite3
+
+# Virtual environments
+env/
+.venv/
+
+# Environment files
 .env
+
+# macOS metadata
+.DS_Store
