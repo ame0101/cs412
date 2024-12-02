@@ -1,5 +1,5 @@
 *.md
-*.txt
+
 *.log
 *.pyc
 *.pyo
