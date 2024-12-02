@@ -1,0 +1,11 @@
+{% extends 'mini_fb/base.html' %}
+
+{% block content %}
+<h2>Update Status Message</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Update Status</button>
+</form>
+<a href="{% url 'show_profile' status_message.profile.pk %}">Cancel</a>
+{% endblock %}

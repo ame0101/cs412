@@ -1,0 +1,19 @@
+<h2>Friend Suggestions</h2>
+{% if friend_suggestions %}
+    <ul class="friends-list">
+        {% for suggestion in friend_suggestions %}
+            <li>
+                <div class="friend-image">
+                    <img src="{{ suggestion.profile_image_url }}" alt="{{ suggestion.first_name }}'s profile picture">
+                </div>
+                <a href="{% url 'show_profile' suggestion.pk %}">
+                    {{ suggestion.first_name }} {{ suggestion.last_name }}
+                </a>
+                <a href="{% url 'add_friend' suggestion.pk %}" class="button button-add-friend">Add Friend</a>
+
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No friend suggestions available.</p>
+{% endif %}

@@ -1,0 +1,10 @@
+{% extends "mini_fb/base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Logged Out</h2>
+    <p>You have been successfully logged out.</p>
+    <a href="{% url 'login' %}" class="button button-login">Login Again</a>
+    <a href="{% url 'show_all_profiles' %}" class="button button-all-profiles">View All Profiles</a>
+</div>
+{% endblock %}

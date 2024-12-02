@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Analyze GitHub Repository</h1>
+    
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="p-4 {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} rounded-lg">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="max-w-2xl">
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700">
+                    {{ form.repository_url.label }}
+                </label>
+                {{ form.repository_url }}
+                {% if form.repository_url.help_text %}
+                <p class="mt-1 text-sm text-gray-500">{{ form.repository_url.help_text }}</p>
+                {% endif %}
+                {% if form.repository_url.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.repository_url.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <button type="submit" class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                Analyze Repository
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

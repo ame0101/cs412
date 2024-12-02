@@ -1,0 +1,641 @@
+
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f2f5;
+}
+
+h1 {
+    color: #1877f2;
+    text-align: center;
+}
+
+h2 {
+    color: #1877f2;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #1877f2;
+    color: white;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+img {
+    border-radius: 50%;
+}
+
+.profile-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.profile-image {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-image img {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #1877f2;
+}
+
+.profile-details p {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+.profile-bio {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    font-style: italic;
+}
+
+form {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 25px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+form input[type="text"],
+form input[type="email"],
+form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+form button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s;
+}
+
+form button[type="submit"]:hover {
+    background-color: #166fe5;
+}
+
+.status-messages {
+    margin-top: 30px;
+}
+
+.status-message {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
+}
+
+.status-message p {
+    margin: 0 0 10px 0;
+    font-size: 1em;
+    color: #333;
+}
+
+.status-message .timestamp {
+    font-size: 0.85em;
+    color: #888;
+}
+nav {
+    background-color: #1877f2;
+    padding: 15px;
+    margin-bottom: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.05em;
+    transition: color 0.3s;
+}
+
+nav ul li a:hover {
+    color: #ddd;
+}
+
+.button, .back-button {
+    display: inline-block;
+    padding: 12px 25px;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    font-weight: bold;
+    text-align: center;
+    margin: 5px;
+    font-size: 1em;
+}
+
+.button, 
+.button-all-profiles,
+.button-create-profile,
+.button-update-profile,
+.button-logout {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95em;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.button:hover, 
+.button-all-profiles:hover,
+.button-create-profile:hover,
+.button-update-profile:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.back-button {
+    background-color: #6c757d;
+}
+
+.back-button:hover {
+    background-color: #5a6268;
+}
+
+.button-create-status {
+    background-color: #051e40;
+}
+
+.button-create-status:hover {
+    background-color: #040f30;
+}
+
+.button-all-profiles {
+    background-color: #1877f2;
+}
+
+.button-all-profiles:hover {
+    background-color: #166fe5;
+}
+
+.button-create-profile {
+    background-color: #051e40;
+}
+
+.button-create-profile:hover {
+    background-color: #040f30;
+}
+
+.button-back-to-profile, .back-button {
+    background-color: #6c757d;
+}
+
+.button-back-to-profile:hover, .back-button:hover {
+    background-color: #5a6268;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.button-container form {
+    margin: 0;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+}
+.status-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.button-update, .button-delete {
+    padding: 8px 15px;
+    font-size: 0.95em;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button-update {
+    background-color: #75cac3;
+}
+
+.button-update:hover {
+    background-color: #66b2b0;
+}
+
+.button-delete {
+    background-color: #6a9fee;
+}
+
+.button-delete:hover {
+    background-color: #5883c7;
+}
+
+.status-message img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.news-feed {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.news-feed-item {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
+}
+
+.news-feed-item p {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #333;
+}
+
+.news-feed-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.friends-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.friends-list li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+.friend-image {
+    margin-right: 15px;
+}
+
+.friend-image img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #1877f2;
+}
+
+.friends-list a:hover {
+    color: white;
+    text-decoration: none;
+}
+
+.friends-list a {
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: bold;
+    flex-grow: 1; 
+    margin-right: 10px;
+}
+
+.button-add-friend {
+    background-color: #008CBA;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    font-size: 0.95em;
+}
+
+.button-add-friend:hover {
+    background-color: #005f6a;
+    color: white;
+}
+
+.friends-list a:not(.button-add-friend) {
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: bold;
+    flex-grow: 1; 
+    margin-right: 10px;
+}
+
+.friends-list a.button-add-friend {
+    background-color: #1877f2;
+    color: white;
+    padding: 8px 6px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    font-size: 0.95em;
+}
+
+.friends-list a.button-add-friend:hover {
+    background-color: #005f6a;
+    color: white;
+}
+
+
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-right: 10px;
+    background-color: #3b5998;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.button:hover {
+    background-color: #2d4373;
+}
+
+
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button[type="submit"] {
+    padding: 10px 20px;
+    background-color: #3b5998;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #2d4373;
+}
+
+
+.profile-container {
+    margin-bottom: 20px;
+}
+
+.profile-image img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 50%;
+}
+
+.profile-details {
+    margin-top: 10px;
+}
+
+
+.status-message {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f2f2f2;
+    border-radius: 4px;
+}
+
+.status-image {
+    max-width: 100%;
+    margin-top: 10px;
+}
+
+
+.friends-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.friends-list li {
+    margin-bottom: 10px;
+}
+
+
+.news-feed {
+    list-style-type: none;
+    padding: 0;
+}
+
+.news-feed-item {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f2f2f2;
+    border-radius: 4px;
+}
+
+.news-feed-image {
+    max-width: 100%;
+    margin-top: 10px;
+}
+.button-login,
+.button-register {
+    background-color: #1877f2;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.button-login:hover,
+.button-register:hover {
+    background-color: #166fe5;
+}
+
+.button-logout {
+    background-color: #f8f9fa;
+    color: #1877f2;
+    padding: 10px 20px;
+}
+
+.button-logout:hover {
+    background-color: #e9ecef;
+    color: #1877f2;
+}
+
+
+.form-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.form-title {
+    text-align: center;
+    color: #1877f2;
+    margin-bottom: 30px;
+}
+
+.registration-form {
+    margin: 0;
+}
+
+.registration-form p {
+    margin-bottom: 20px;
+}
+
+.registration-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.registration-form input[type="text"],
+.registration-form input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.registration-form input[type="text"]:focus,
+.registration-form input[type="password"]:focus {
+    border-color: #1877f2;
+    outline: none;
+    box-shadow: 0 0 5px rgba(24, 119, 242, 0.2);
+}
+
+.registration-form ul.errorlist {
+    color: #dc3545;
+    padding-left: 0;
+    list-style: none;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.registration-form .helptext {
+    color: #666;
+    font-size: 14px;
+    margin-top: 5px;
+    display: block;
+}
+
+.form-footer {
+    margin-top: 20px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.form-footer p {
+    margin: 0;
+    color: #666;
+}
+
+.form-footer .button-login {
+    margin-left: 10px;
+    font-size: 0.9em;
+    padding: 8px 15px;
+}
+
+.registration-form .button-register {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+}

@@ -1,0 +1,10 @@
+*.md
+*.txt
+*.log
+*.pyc
+*.pyo
+.env
+/tests/
+docs/
+node_modules/
+__pycache__/

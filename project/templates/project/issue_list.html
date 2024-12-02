@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-6">Analyzed Repositories</h1>
+
+  <div class="grid grid-cols-3 gap-4 mb-8">
+    <div class="p-4 bg-blue-50 rounded-lg">
+      <div class="text-2xl font-bold text-blue-700">{{ stats.total_repos }}</div>
+      <div class="text-sm text-gray-600">Total Repositories</div>
+    </div>
+    <div class="p-4 bg-green-50 rounded-lg">
+      <div class="text-2xl font-bold text-green-700">{{ stats.completed_repos }}</div>
+      <div class="text-sm text-gray-600">Completed Analysis</div>
+    </div>
+    <div class="p-4 bg-yellow-50 rounded-lg">
+      <div class="text-2xl font-bold text-yellow-700">{{ stats.analyzing_repos }}</div>
+      <div class="text-sm text-gray-600">Analysis in Progress</div>
+    </div>
+  </div>
+
+  <ul>
+    {% for repository in repositories %}
+    <li class="mb-4">
+      <a href="{% url 'project:repository-detail' repository.pk %}" class="text-xl font-semibold hover:text-blue-600">
+        {{ repository.name }}
+      </a>
+      <div class="text-gray-600">{{ repository.url }}</div>
+      <div class="text-sm text-gray-500">Last analyzed: {{ repository.last_analyzed|date:"F j, Y H:i" }}</div>
+    </li>
+    {% empty %}
+    <li>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">No Repositories Found</h3>
+      <p>Start by analyzing a repository.</p>
+    </li>
+    {% endfor %}
+  </ul>
+
+  {% if is_paginated %}
+  <div class="pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">&laquo; Previous</a>
+    {% endif %}
+    <span class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">Next &raquo;</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

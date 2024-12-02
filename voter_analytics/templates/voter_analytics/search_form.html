@@ -1,0 +1,69 @@
+{% extends 'voter_analytics/base.html' %}
+
+{% block content %}
+<div class="search-form">
+    <form method="get">
+        <label for="party">Party:</label>
+        <select name="party" id="party">
+            <option value="">Select Party</option>
+            <option value="Democratic">Democratic</option>
+            <option value="Republican">Republican</option>
+            <option value="Independent">Independent</option>
+            <option value="Green">Green</option>
+            <option value="Libertarian">Libertarian</option>
+            <!-- Add more parties as needed -->
+        </select>
+
+        <label for="min_year">Min Year of Birth:</label>
+        <select name="min_year" id="min_year">
+            <option value="">Select Year</option>
+            {% for year in years %}
+                <option value="{{ year }}" {% if request.GET.min_year|stringformat:"i" == year|stringformat:"i" %}selected{% endif %}>
+                    {{ year }}
+                </option>
+            {% endfor %}
+        </select>
+        
+
+        <label for="max_year">Max Year of Birth:</label>
+
+        <select name="max_year" id="max_year">
+            <option value="">Select Year</option>
+            {% for year in years %}
+                <option value="{{ year }}" {% if request.GET.max_year|stringformat:"i" == year|stringformat:"i" %}selected{% endif %}>
+                    {{ year }}
+                </option>
+            {% endfor %}
+        </select>
+
+
+        <label for="voter_score">Voter Score:</label>
+        <select name="voter_score" id="voter_score">
+            <option value="">Select Score</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+
+        <label for="v20state">Voted in 2020 State:</label>
+        <input type="checkbox" name="v20state" id="v20state">
+
+        <label for="v21town">Voted in 2021 Town:</label>
+        <input type="checkbox" name="v21town" id="v21town">
+
+        <label for="v21primary">Voted in 2021 Primary:</label>
+        <input type="checkbox" name="v21primary" id="v21primary">
+
+        <label for="v22general">Voted in 2022 General:</label>
+        <input type="checkbox" name="v22general" id="v22general">
+
+        <label for="v23town">Voted in 2023 Town:</label>
+        <input type="checkbox" name="v23town" id="v23town">
+
+        <button type="submit">Search</button>
+    </form>
+</div>
+{% endblock %}

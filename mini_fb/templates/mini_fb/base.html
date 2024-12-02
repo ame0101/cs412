@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Facebook</title>
+    {% load static %}
+    
+    <link rel="stylesheet" href="{% static 'mini_fb/styles.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Mini Facebook</h1>
+        <nav>
+            <div class="button-container">
+                <a href="{% url 'show_all_profiles' %}" class="button button-all-profiles">All Profiles</a>
+
+                {% if request.user.is_authenticated %}
+                    {% if request.user.profile %}
+                    <a href="{% url 'create_profile' %}" class="button button-create-profile">Create New Profile</a>
+                    <a href="{% url 'update_profile' %}" class="button button-update-profile">Update Profile</a>
+                    {% else %}
+                        <a href="{% url 'create_profile' %}" class="button button-create-profile">Create Profile</a>
+                    {% endif %}
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <input type="submit" value="Logout" class="button button-logout">
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="button button-login">Login</a>
+                    <a href="{% url 'register' %}" class="button button-register">Register</a>
+                {% endif %}
+                
+                
+            </div>
+        </nav>
+    </header>
+    
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+    
+    <footer>
+        <p>&copy; 2024 Mini Facebook</p>
+    </footer>
+</body>
+</html>

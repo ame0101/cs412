@@ -1,0 +1,15 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}Welcome to Our Restaurant{% endblock %}
+
+{% block content %}
+    <h1>Welcome to Really Good Restaurant</h1>
+    <p>Location: Boston</p>
+    <h2>Hours of Operation</h2>
+    <ul>
+        <li>Monday - Friday: 11:00 AM - 5:00 PM</li>
+        <li>Saturday - Sunday: 10:00 AM -3:00 PM</li>
+    </ul>
+    <img src="{% static '/images/restaurant.jpeg' %}" alt="Restaurant Image">
+{% endblock %}

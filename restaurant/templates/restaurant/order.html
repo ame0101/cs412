@@ -1,0 +1,67 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}Place an Order{% endblock %}
+
+{% block content %}
+    <h1>Place Your Order</h1>
+    <form method="POST" action="{% url 'confirmation' %}">
+        {% csrf_token %}
+
+        <h2>Menu</h2>
+        <p>Please select the items you'd like to order:</p>
+
+         <div>
+            <input type="checkbox" id="mangu" name="mangu" value="7.99">
+            <label for="mangu">Mangú (Mashed Plantains) - $7.99</label><br>
+        </div>
+
+         <div>
+            <input type="checkbox" id="sancocho" name="sancocho" value="12.99">
+            <label for="sancocho">Sancocho (7 Meat Stew) - $12.99</label><br>
+        </div>
+
+         <div>
+            <input type="checkbox" id="empanada" name="empanada" value="4.99">
+            <label for="empanada">Empanada - $4.99</label><br>
+
+            <label for="filling">Choose your filling:</label>
+            <select id="filling" name="filling">
+                <option value="chicken">Chicken</option>
+                <option value="beef">Beef</option>
+                <option value="cheese">Cheese</option>
+            </select><br>
+        </div>
+
+        <div>
+            <h2>Daily Special:</h2>
+            <input type="checkbox" id="daily_special" name="daily_special" value="{{ daily_special.price }}">
+            <label for="daily_special">{{ daily_special.name }} - ${{ daily_special.price }}</label><br>
+        </div>
+
+         <div>
+            <label for="instructions">Special Instructions:</label><br>
+            <textarea id="instructions" name="instructions" rows="4" cols="50"></textarea><br>
+        </div>
+        
+
+         <h2>Customer Information:</h2>
+        <div>
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name" required><br>
+        </div>
+
+        <div>
+            <label for="phone">Phone Number:</label><br>
+            <input type="number" id="phone" name="phone"  pattern="[0-9]{10}" required><br>
+        </div>
+
+        <div>
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required><br>
+        </div>
+
+         <button type="submit">Submit Order</button>
+    </form>
+{% endblock %}
+

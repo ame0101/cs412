@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Issues Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="{% url 'project:issue-list' %}" class="text-2xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
+                    Crypto Issues Finder
+                </a>
+                <a href="{% url 'project:analyze' %}" 
+                   class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                    Analyze Repository
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    {% block content %}{% endblock %}
+    
+    <footer class="bg-white mt-12 py-6">
+        <div class="container mx-auto px-4 text-center text-gray-600">
+            <p>&copy; 2024 Crypto Issues Finder</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!-- templates/voter_analytics/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Voter Analytics{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'voter_analytics/styles.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Voter Analytics Application</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'voters' %}">Home</a></li>
+                <li><a href="{% url 'graphs' %}">Graphs</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Voter Analytics</p>
+    </footer>
+</body>
+</html>

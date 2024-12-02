@@ -1,0 +1,12 @@
+{% extends 'mini_fb/base.html' %}
+
+{% block content %}
+<h2>Create a New Status Message</h2>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="file" name="files" multiple />
+    <button type="submit">Post Status</button>
+</form>
+<a href="{% url 'show_profile' profile.pk %}">Back to Profile</a>
+{% endblock %}

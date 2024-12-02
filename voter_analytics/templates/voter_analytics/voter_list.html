@@ -1,0 +1,125 @@
+{% extends 'voter_analytics/base.html' %}
+
+{% block title %}Voters{% endblock %}
+
+{% block content %}
+<h1>Voters</h1>
+
+<section class="search-section">
+    <h2>Search Form</h2>
+    <form method="get" class="search-form">
+        <div class="form-row">
+            <label for="party">Party Affiliation:</label>
+            <select name="party" id="party">
+                <option value="">All parties</option>
+                <option value="Democratic">Democratic</option>
+                <option value="Republican">Republican</option>
+                <option value="Constitution">Constitution Party</option>
+                <option value="Libertarian">Libertarian Party</option>
+                <option value="Tea">Tea Party</option>
+                <option value="Other">Other</option>
+                <option value="Green">Green Party</option>
+                <option value="Independent">Independent Party</option>
+                <option value="Reform">Reform Party</option>
+                <option value="Freedom">Freedom Party</option>
+            </select>
+        </div>
+
+        <!-- Minimum Birth Year Dropdown -->
+        <div class="form-row">
+            <label for="min_year">Minimum Birth Year:</label>
+            <select name="min_year" id="min_year">
+                <option value="">Select Year</option>
+                {% for year in years %}
+                <option value="{{ year }}">{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Maximum Birth Year Dropdown -->
+        <div class="form-row">
+            <label for="max_year">Maximum Birth Year:</label>
+            <select name="max_year" id="max_year">
+                <option value="">Select Year</option>
+                {% for year in years %}
+                <option value="{{ year }}">{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Voter Score Dropdown -->
+        <div class="form-row">
+            <label for="score">Voter Score:</label>
+            <select name="score" id="score">
+                <option value="">Select Score</option>
+                {% for score in voter_scores %}
+                <option value="{{ score }}">{{ score }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Voted in Elections:</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" name="v20state" {% if request.GET.v20state %}checked{% endif %}> 2020 State Election</label>
+                <label><input type="checkbox" name="v21town" {% if request.GET.v21town %}checked{% endif %}> 2021 Town Election</label>
+                <label><input type="checkbox" name="v21primary" {% if request.GET.v21primary %}checked{% endif %}> Primary Election</label>
+                <label><input type="checkbox" name="v22general" {% if request.GET.v22general %}checked{% endif %}> 2022 General Election</label>
+                <label><input type="checkbox" name="v23town" {% if request.GET.v23town %}checked{% endif %}> 2023 Town Election</label>
+            </div>
+        </div>
+
+        <button type="submit">Search</button>
+    </form>
+</section>
+
+<section class="voters-list">
+    <table>
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Address</th>
+                <th>Date of Birth</th>
+                <th>Party</th>
+                <th>Voter Score</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for voter in page_obj %}
+            <tr>
+                <td>{{ voter.first_name }}</td>
+                <td>{{ voter.last_name }}</td>
+                <td>
+                    {{ voter.address_number }} {{ voter.address_street }}
+                    {% if voter.address_apt %}, Apt {{ voter.address_apt }}{% endif %}
+                </td>
+                <td>{{ voter.date_of_birth|date:"M j, Y" }}</td>
+                <td>{{ voter.party }}</td>
+                <td>{{ voter.voter_score }}</td>
+                <td><a href="{% url 'voter' voter.pk %}" class="detail-link">Details</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</section>
+{% endblock %}
