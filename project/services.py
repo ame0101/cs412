@@ -1,3 +1,4 @@
+# your_app/services.py
 import re
 import base64
 import requests
@@ -5,8 +6,10 @@ import asyncio
 import ast
 from datetime import datetime
 from .models import Repository, CryptoIssue
+from .utils import generate_issue_hash  # Import the utility function
 import logging
 import os
+
 logger = logging.getLogger(__name__)
 
 class CryptoAnalyzer:
@@ -104,75 +107,103 @@ class CryptoAnalyzer:
             for node in ast.walk(tree):
                 if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
                     if node.func.id in ['DES', 'RC4', 'MD5', 'SHA1', 'Blowfish', 'MD4', 'MD2', 'MD6']:
-                        issues.append(self._create_issue(repo, file_path, node, 'weak_cipher', 'Weak or deprecated cryptographic algorithm detected'))
+                        issue = self._create_issue(repo, file_path, node, 'weak_cipher', 'Weak or deprecated cryptographic algorithm detected')
+                        if issue:
+                            issues.append(issue)
                     elif node.func.id in ['random', 'Math.random', 'rand', 'srand']:
-                        issues.append(self._create_issue(repo, file_path, node, 'unsafe_random', 'Potentially unsafe random number generation'))
+                        issue = self._create_issue(repo, file_path, node, 'unsafe_random', 'Potentially unsafe random number generation')
+                        if issue:
+                            issues.append(issue)
                     elif node.func.id == 'ECB':
-                        issues.append(self._create_issue(repo, file_path, node, 'insecure_mode', 'Insecure mode of operation (ECB) detected'))
+                        issue = self._create_issue(repo, file_path, node, 'insecure_mode', 'Insecure mode of operation (ECB) detected')
+                        if issue:
+                            issues.append(issue)
                     elif node.func.id == 'eval':
-                        issues.append(self._create_issue(repo, file_path, node, 'code_injection', 'Potential code injection vulnerability detected'))
+                        issue = self._create_issue(repo, file_path, node, 'code_injection', 'Potential code injection vulnerability detected')
+                        if issue:
+                            issues.append(issue)
                     elif node.func.id == 'exec':
-                        issues.append(self._create_issue(repo, file_path, node, 'command_injection', 'Potential command injection vulnerability detected'))
+                        issue = self._create_issue(repo, file_path, node, 'command_injection', 'Potential command injection vulnerability detected')
+                        if issue:
+                            issues.append(issue)
                 elif isinstance(node, ast.Assign):
                     for target in node.targets:
                         if isinstance(target, ast.Name) and target.id.lower() in ['password', 'secret', 'key', 'token', 'credential']:
-                            issues.append(self._create_issue(repo, file_path, node, 'hardcoded_secret', 'Potential hardcoded secret detected'))
+                            issue = self._create_issue(repo, file_path, node, 'hardcoded_secret', 'Potential hardcoded secret detected')
+                            if issue:
+                                issues.append(issue)
                 elif isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
                     for alias in node.names:
                         if alias.name.lower() in ['cryptography', 'pycrypto', 'pynacl', 'passlib']:
-                            issues.append(self._create_issue(repo, file_path, node, 'insecure_library', 'Potentially insecure cryptography library detected'))
+                            issue = self._create_issue(repo, file_path, node, 'insecure_library', 'Potentially insecure cryptography library detected')
+                            if issue:
+                                issues.append(issue)
                 elif isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == 'ssl':
                     if node.attr in ['CERT_NONE', 'CERT_OPTIONAL']:
-                        issues.append(self._create_issue(repo, file_path, node, 'insecure_ssl', 'Insecure SSL/TLS certificate verification detected'))
+                        issue = self._create_issue(repo, file_path, node, 'insecure_ssl', 'Insecure SSL/TLS certificate verification detected')
+                        if issue:
+                            issues.append(issue)
                 elif isinstance(node, ast.Str):
                     if re.search(r'\b(password|secret|key|token|credential)\b', node.s, re.IGNORECASE):
-                        issues.append(self._create_issue(repo, file_path, node, 'sensitive_data', 'Potential sensitive data in string literal detected'))
+                        issue = self._create_issue(repo, file_path, node, 'sensitive_data', 'Potential sensitive data in string literal detected')
+                        if issue:
+                            issues.append(issue)
                 elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.LShift):
-                    issues.append(self._create_issue(repo, file_path, node, 'weak_hash', 'Potentially weak custom hash function detected'))
+                    issue = self._create_issue(repo, file_path, node, 'weak_hash', 'Potentially weak custom hash function detected')
+                    if issue:
+                        issues.append(issue)
             if issues:
                 logger.info(f"Detected {len(issues)} issues in {file_path}")
-                await asyncio.to_thread(CryptoIssue.objects.bulk_create, issues)
+                # Remove None values (existing issues)
+                new_issues = [issue for issue in issues if issue is not None]
+                if new_issues:
+                    await asyncio.to_thread(CryptoIssue.objects.bulk_create, new_issues)
         except Exception as e:
             logger.error(f"Error analyzing content for {file_path}: {e}", exc_info=True)
 
     def _create_issue(self, repo, file_path, node, issue_type, description):
         line_number = node.lineno
-        code_snippet = ast.unparse(node)
+        try:
+            code_snippet = ast.unparse(node)
+        except Exception:
+            code_snippet = "N/A"
+
+        issue_hash = generate_issue_hash(issue_type, file_path, line_number, code_snippet)
+
+        # Check if the issue already exists
+        if CryptoIssue.objects.filter(issue_hash=issue_hash).exists():
+            logger.debug(f"Issue already exists: {issue_hash}")
+            return None  # Issue already exists
+
         recommendation = self._get_recommendation(issue_type, code_snippet)
+        severity = self._get_severity(issue_type)
+
         return CryptoIssue(
             repository=repo,
             file_path=file_path,
             line_number=line_number,
             issue_type=issue_type,
             description=description,
-            severity=self._get_severity(issue_type),
+            severity=severity,
             code_snippet=code_snippet,
-            recommendation=recommendation
+            recommendation=recommendation,
+            issue_hash=issue_hash
         )
 
     def _get_recommendation(self, issue_type, code_snippet):
-        if issue_type == 'weak_cipher':
-            return f"The code uses a weak or deprecated cipher: {code_snippet}\nRecommendation: Use a strong, modern encryption algorithm like AES-256-GCM."
-        elif issue_type == 'hardcoded_secret':
-            return f"Hardcoded secret detected: {code_snippet}\nRecommendation: Store secrets securely using environment variables, a configuration management system, or a secrets management service. Avoid hardcoding secrets in the codebase."
-        elif issue_type == 'unsafe_random':
-            return f"Potentially unsafe random number generation: {code_snippet}\nRecommendation: Use a cryptographically secure random number generator suitable for your language/framework, such as os.urandom() or secrets module in Python."
-        elif issue_type == 'insecure_mode':
-            return f"Insecure mode of operation detected: {code_snippet}\nRecommendation: Avoid using ECB mode as it is vulnerable to pattern-based attacks. Use secure modes like CBC with a secure padding scheme or an authenticated encryption mode like GCM."
-        elif issue_type == 'code_injection':
-            return f"Potential code injection vulnerability detected: {code_snippet}\nRecommendation: Avoid using eval() with untrusted input. Sanitize and validate any dynamic input used in eval() expressions."
-        elif issue_type == 'command_injection':  
-            return f"Potential command injection vulnerability detected: {code_snippet}\nRecommendation: Avoid using exec() with untrusted input. Use safe alternatives like subprocess.run() with argument list instead of shell=True."
-        elif issue_type == 'insecure_library':
-            return f"Potentially insecure cryptography library detected: {code_snippet}\nRecommendation: Ensure you are using a reputable, actively maintained cryptography library. Consider using high-level libraries that provide secure defaults. Regularly update dependencies to include security patches."
-        elif issue_type == 'insecure_ssl':
-            return f"Insecure SSL/TLS certificate verification detected: {code_snippet}\nRecommendation: Always use SSL.CERT_REQUIRED to enforce proper certificate validation. Avoid disabling certificate verification or allowing self-signed certificates in production."
-        elif issue_type == 'sensitive_data':
-            return f"Potential sensitive data in string literal detected: {code_snippet}\nRecommendation: Avoid storing sensitive information like passwords, secrets, or tokens in plain text. Use secure hashing, encryption, or a secrets management system as appropriate."
-        elif issue_type == 'weak_hash':
-            return f"Potentially weak custom hash function detected: {code_snippet}\nRecommendation: Use a strong, well-established hashing algorithm like SHA-256 or SHA-3 instead of creating custom hash functions. Consider using a standard library or a reputable third-party library for hashing."
-        else:
-            return 'Review and update the code following secure coding practices and industry standards. Consult OWASP guidelines, language-specific security resources, and up-to-date cryptography best practices.'
+        recommendations = {
+            'weak_cipher': f"The code uses a weak or deprecated cipher: {code_snippet}\nRecommendation: Use a strong, modern encryption algorithm like AES-256-GCM.",
+            'hardcoded_secret': f"Hardcoded secret detected: {code_snippet}\nRecommendation: Store secrets securely using environment variables, a configuration management system, or a secrets management service. Avoid hardcoding secrets in the codebase.",
+            'unsafe_random': f"Potentially unsafe random number generation: {code_snippet}\nRecommendation: Use a cryptographically secure random number generator suitable for your language/framework, such as os.urandom() or the secrets module in Python.",
+            'insecure_mode': f"Insecure mode of operation detected: {code_snippet}\nRecommendation: Avoid using ECB mode as it is vulnerable to pattern-based attacks. Use secure modes like CBC with a secure padding scheme or an authenticated encryption mode like GCM.",
+            'code_injection': f"Potential code injection vulnerability detected: {code_snippet}\nRecommendation: Avoid using eval() with untrusted input. Sanitize and validate any dynamic input used in eval() expressions.",
+            'command_injection': f"Potential command injection vulnerability detected: {code_snippet}\nRecommendation: Avoid using exec() with untrusted input. Use safe alternatives like subprocess.run() with argument lists instead of shell=True.",
+            'insecure_library': f"Potentially insecure cryptography library detected: {code_snippet}\nRecommendation: Ensure you are using a reputable, actively maintained cryptography library. Consider using high-level libraries that provide secure defaults. Regularly update dependencies to include security patches.",
+            'insecure_ssl': f"Insecure SSL/TLS certificate verification detected: {code_snippet}\nRecommendation: Always use SSL.CERT_REQUIRED to enforce proper certificate validation. Avoid disabling certificate verification or allowing self-signed certificates in production.",
+            'sensitive_data': f"Potential sensitive data in string literal detected: {code_snippet}\nRecommendation: Avoid storing sensitive information like passwords, secrets, or tokens in plain text. Use secure hashing, encryption, or a secrets management system as appropriate.",
+            'weak_hash': f"Potentially weak custom hash function detected: {code_snippet}\nRecommendation: Use a strong, well-established hashing algorithm like SHA-256 or SHA-3 instead of creating custom hash functions. Consider using a standard library or a reputable third-party library for hashing."
+        }
+        return recommendations.get(issue_type, 'Review and update the code following secure coding practices and industry standards. Consult OWASP guidelines, language-specific security resources, and up-to-date cryptography best practices.')
 
     def _get_severity(self, issue_type):
         severity_map = {
@@ -219,13 +250,13 @@ class GitHubService:
         try:
             crypto_issue, created = CryptoIssue.objects.get_or_create(
                 repository=repo,
-                issue_id=issue['id'],
+                issue_hash=self._generate_github_issue_hash(issue),
                 defaults={
                     'title': issue['title'],
                     'description': issue['body'],
                     'state': issue['state'],
                     'url': issue['html_url'],
-                    # Add other fields as needed
+                    'severity': 'critical',  # You might want to map GitHub severity if available
                 }
             )
 
@@ -238,3 +269,14 @@ class GitHubService:
                 crypto_issue.save()
         except Exception as e:
             raise Exception(f'Error creating or updating issue {issue["id"]}: {str(e)}')
+
+    def _generate_github_issue_hash(self, issue):
+        """
+        Generates a unique hash for GitHub issues based on their ID.
+        """
+        return generate_issue_hash(
+            issue_type='github_issue',
+            file_path='N/A',
+            line_number=issue['id'],
+            code_snippet=issue['title']
+        )
