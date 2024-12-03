@@ -111,13 +111,11 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = "cs412.wsgi.application"
 
-
-# Database configuration
 DATABASES = {
-    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
 }
 
-# Fallback to SQLite for local development
+
 if 'DATABASE_URL' not in os.environ:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
