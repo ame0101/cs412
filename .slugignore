@@ -8,3 +8,7 @@
 docs/
 node_modules/
 __pycache__/
+*.psd
+*.pdf
+/test
+/spec
