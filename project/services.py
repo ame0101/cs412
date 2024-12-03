@@ -1,8 +1,8 @@
-# services.py
 import re
 import base64
 import requests
 import asyncio
+import ast
 from datetime import datetime
 from .models import Repository, CryptoIssue
 import logging
@@ -15,58 +15,6 @@ class CryptoAnalyzer:
         self.token = github_token
         self.headers = {'Authorization': f'token {github_token}'}
         self.session = requests.Session()
-        self.crypto_patterns = {
-            'weak_cipher': (
-                r'(DES|RC4|MD5|SHA1)',
-                'Weak cryptographic algorithm detected',
-                'critical'
-            ),
-            'hardcoded_secret': (
-                r'(password|secret|key|token)\s*=\s*["\'][^"\']+["\']',
-                'Potential hardcoded secret detected',
-                'high'
-            ),
-            'unsafe_random': (
-                r'random\.|Math\.random|rand\(|srand\(',
-                'Potentially unsafe random number generation',
-                'medium'
-            ),
-            'weak_hash': (
-                r'createHash\(["\']md5["\']\)|createHash\(["\']sha1["\']\)|hash\(["\']md5["\']\)',
-                'Weak hashing algorithm detected',
-                'high'
-            ),
-            'ecb_mode': (
-                r'ECB|electronic codebook',
-                'ECB mode encryption detected',
-                'critical'
-            ),
-            'static_iv': (
-                r'iv\s*=\s*["\'].*?["\']|InitializationVector\(["\'].*?["\']\)',
-                'Static initialization vector detected',
-                'high'
-            ),
-            'static_salt': (
-                r'salt\s*=\s*["\'][^"\']+["\']',
-                'Static salt value detected',
-                'high'
-            ),
-            'weak_key_size': (
-                r'keysize\s*=\s*\d{1,3}|key_size\s*=\s*\d{1,3}',
-                'Potentially weak key size',
-                'medium'
-            ),
-            'deprecated_crypto': (
-                r'(Blowfish|RC2|RC5|IDEA)',
-                'Deprecated cryptographic algorithm detected',
-                'high'
-            ),
-            'timing_attack': (
-                r'(strcmp\(|memcmp\()',
-                'Potential timing attack vulnerability in string comparison',
-                'medium'
-            )
-        }
 
     def analyze_repository(self, repo_url):
         logger.info(f"Starting analysis for repository: {repo_url}")
@@ -100,7 +48,6 @@ class CryptoAnalyzer:
                 repo.save()
             raise
 
-
     async def analyze_contents_async(self, repo, contents_url, path_prefix=''):
         logger.info(f"Fetching contents from: {contents_url}")
         try:
@@ -131,17 +78,15 @@ class CryptoAnalyzer:
 
     async def analyze_file_async(self, repo, file_info, file_path):
         try:
-            print(f"Analyzing file: {file_path}")  # Debugging: Log each file being analyzed
             response = self.session.get(file_info['url'], headers=self.headers)
             response.raise_for_status()
             content = response.json()
 
             if content['encoding'] == 'base64':
                 file_content = base64.b64decode(content['content']).decode('utf-8')
-                print(f"Decoded content for {file_path}: {file_content[:100]}...")  # Log partial file content
                 await self._analyze_content(repo, file_path, file_content)
         except Exception as e:
-            print(f"Error analyzing file {file_path}: {str(e)}")
+            logger.error(f"Error analyzing file {file_path}: {str(e)}", exc_info=True)
 
     def _is_analyzable_file(self, filename):
         extensions = (
@@ -155,55 +100,94 @@ class CryptoAnalyzer:
         logger.info(f"Analyzing content for file: {file_path}")
         try:
             issues = []
-            for pattern_name, (pattern, description, severity) in self.crypto_patterns.items():
-                logger.debug(f"Applying pattern: {pattern_name} ({pattern})")
-                for match in re.finditer(pattern, content, re.IGNORECASE | re.MULTILINE):
-                    line_number = content[:match.start()].count('\n') + 1
-                    code_snippet = self._get_code_snippet(content, match)
-                    logger.debug(f"Match found: {pattern_name}, Line: {line_number}, Code: {code_snippet}")
-
-                    issues.append(
-                        CryptoIssue(
-                            repository=repo,
-                            file_path=file_path,
-                            line_number=line_number,
-                            issue_type=pattern_name,
-                            description=description,
-                            severity=severity,
-                            code_snippet=code_snippet,
-                            recommendation=self._get_recommendation(pattern_name)
-                        )
-                    )
+            tree = ast.parse(content)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                    if node.func.id in ['DES', 'RC4', 'MD5', 'SHA1', 'Blowfish', 'MD4', 'MD2', 'MD6']:
+                        issues.append(self._create_issue(repo, file_path, node, 'weak_cipher', 'Weak or deprecated cryptographic algorithm detected'))
+                    elif node.func.id in ['random', 'Math.random', 'rand', 'srand']:
+                        issues.append(self._create_issue(repo, file_path, node, 'unsafe_random', 'Potentially unsafe random number generation'))
+                    elif node.func.id == 'ECB':
+                        issues.append(self._create_issue(repo, file_path, node, 'insecure_mode', 'Insecure mode of operation (ECB) detected'))
+                    elif node.func.id == 'eval':
+                        issues.append(self._create_issue(repo, file_path, node, 'code_injection', 'Potential code injection vulnerability detected'))
+                    elif node.func.id == 'exec':
+                        issues.append(self._create_issue(repo, file_path, node, 'command_injection', 'Potential command injection vulnerability detected'))
+                elif isinstance(node, ast.Assign):
+                    for target in node.targets:
+                        if isinstance(target, ast.Name) and target.id.lower() in ['password', 'secret', 'key', 'token', 'credential']:
+                            issues.append(self._create_issue(repo, file_path, node, 'hardcoded_secret', 'Potential hardcoded secret detected'))
+                elif isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
+                    for alias in node.names:
+                        if alias.name.lower() in ['cryptography', 'pycrypto', 'pynacl', 'passlib']:
+                            issues.append(self._create_issue(repo, file_path, node, 'insecure_library', 'Potentially insecure cryptography library detected'))
+                elif isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == 'ssl':
+                    if node.attr in ['CERT_NONE', 'CERT_OPTIONAL']:
+                        issues.append(self._create_issue(repo, file_path, node, 'insecure_ssl', 'Insecure SSL/TLS certificate verification detected'))
+                elif isinstance(node, ast.Str):
+                    if re.search(r'\b(password|secret|key|token|credential)\b', node.s, re.IGNORECASE):
+                        issues.append(self._create_issue(repo, file_path, node, 'sensitive_data', 'Potential sensitive data in string literal detected'))
+                elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.LShift):
+                    issues.append(self._create_issue(repo, file_path, node, 'weak_hash', 'Potentially weak custom hash function detected'))
             if issues:
                 logger.info(f"Detected {len(issues)} issues in {file_path}")
                 await asyncio.to_thread(CryptoIssue.objects.bulk_create, issues)
         except Exception as e:
             logger.error(f"Error analyzing content for {file_path}: {e}", exc_info=True)
 
-    def _get_code_snippet(self, content, match):
-        lines = content.split('\n')
-        line_number = content[:match.start()].count('\n')
-        start_line = max(0, line_number - 2)
-        end_line = min(len(lines), line_number + 3)
-        return '\n'.join(lines[start_line:end_line])
+    def _create_issue(self, repo, file_path, node, issue_type, description):
+        line_number = node.lineno
+        code_snippet = ast.unparse(node)
+        recommendation = self._get_recommendation(issue_type, code_snippet)
+        return CryptoIssue(
+            repository=repo,
+            file_path=file_path,
+            line_number=line_number,
+            issue_type=issue_type,
+            description=description,
+            severity=self._get_severity(issue_type),
+            code_snippet=code_snippet,
+            recommendation=recommendation
+        )
 
-    def _get_recommendation(self, issue_type):
-        recommendations = {
-            'weak_cipher': 'Use strong encryption algorithms like AES-256-GCM. Avoid outdated algorithms like DES, RC4, MD5, and SHA1.',
-            'hardcoded_secret': 'Store sensitive information in environment variables or use a secure secret management system.',
-            'unsafe_random': 'Use cryptographically secure random number generation. In Python, use secrets module instead of random.',
-            'weak_hash': 'Use strong hashing algorithms like SHA-256, SHA-3, or better. Consider using specialized password hashing functions like Argon2 for passwords.',
-            'ecb_mode': 'Use secure modes of operation like GCM or CBC with proper padding. ECB mode is not secure for most use cases.',
-            'static_iv': 'Generate a new random IV for each encryption operation. Never reuse IVs.',
-            'static_salt': 'Generate a unique random salt for each hash operation. Store the salt alongside the hash.',
-            'weak_key_size': 'Use appropriate key sizes: at least 256 bits for symmetric keys, 2048 bits for RSA, 384 bits for elliptic curves.',
-            'deprecated_crypto': 'Replace deprecated algorithms with modern alternatives. Consult current cryptographic standards and best practices.',
-            'timing_attack': 'Use constant-time comparison functions when comparing sensitive values like hashes or tokens.'
+    def _get_recommendation(self, issue_type, code_snippet):
+        if issue_type == 'weak_cipher':
+            return f"The code uses a weak or deprecated cipher: {code_snippet}\nRecommendation: Use a strong, modern encryption algorithm like AES-256-GCM."
+        elif issue_type == 'hardcoded_secret':
+            return f"Hardcoded secret detected: {code_snippet}\nRecommendation: Store secrets securely using environment variables, a configuration management system, or a secrets management service. Avoid hardcoding secrets in the codebase."
+        elif issue_type == 'unsafe_random':
+            return f"Potentially unsafe random number generation: {code_snippet}\nRecommendation: Use a cryptographically secure random number generator suitable for your language/framework, such as os.urandom() or secrets module in Python."
+        elif issue_type == 'insecure_mode':
+            return f"Insecure mode of operation detected: {code_snippet}\nRecommendation: Avoid using ECB mode as it is vulnerable to pattern-based attacks. Use secure modes like CBC with a secure padding scheme or an authenticated encryption mode like GCM."
+        elif issue_type == 'code_injection':
+            return f"Potential code injection vulnerability detected: {code_snippet}\nRecommendation: Avoid using eval() with untrusted input. Sanitize and validate any dynamic input used in eval() expressions."
+        elif issue_type == 'command_injection':  
+            return f"Potential command injection vulnerability detected: {code_snippet}\nRecommendation: Avoid using exec() with untrusted input. Use safe alternatives like subprocess.run() with argument list instead of shell=True."
+        elif issue_type == 'insecure_library':
+            return f"Potentially insecure cryptography library detected: {code_snippet}\nRecommendation: Ensure you are using a reputable, actively maintained cryptography library. Consider using high-level libraries that provide secure defaults. Regularly update dependencies to include security patches."
+        elif issue_type == 'insecure_ssl':
+            return f"Insecure SSL/TLS certificate verification detected: {code_snippet}\nRecommendation: Always use SSL.CERT_REQUIRED to enforce proper certificate validation. Avoid disabling certificate verification or allowing self-signed certificates in production."
+        elif issue_type == 'sensitive_data':
+            return f"Potential sensitive data in string literal detected: {code_snippet}\nRecommendation: Avoid storing sensitive information like passwords, secrets, or tokens in plain text. Use secure hashing, encryption, or a secrets management system as appropriate."
+        elif issue_type == 'weak_hash':
+            return f"Potentially weak custom hash function detected: {code_snippet}\nRecommendation: Use a strong, well-established hashing algorithm like SHA-256 or SHA-3 instead of creating custom hash functions. Consider using a standard library or a reputable third-party library for hashing."
+        else:
+            return 'Review and update the code following secure coding practices and industry standards. Consult OWASP guidelines, language-specific security resources, and up-to-date cryptography best practices.'
+
+    def _get_severity(self, issue_type):
+        severity_map = {
+            'weak_cipher': 'high', 
+            'hardcoded_secret': 'critical',
+            'unsafe_random': 'high',
+            'insecure_mode': 'high',
+            'code_injection': 'critical',
+            'command_injection': 'critical', 
+            'insecure_library': 'medium',
+            'insecure_ssl': 'high',
+            'sensitive_data': 'high',
+            'weak_hash': 'medium'
         }
-        return recommendations.get(issue_type, 'Review and update the code following current security best practices.')
-
-analyzer = CryptoAnalyzer(github_token=os.getenv('GITHUB_TOKEN'))
-
+        return severity_map.get(issue_type, 'low')
 
 class GitHubService:
     def __init__(self, token):
