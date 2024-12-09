@@ -121,7 +121,7 @@ WSGI_APPLICATION = "cs412.wsgi.application"
 
 
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='postgres://localhost:5432/mydb')
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
 # Password validation
