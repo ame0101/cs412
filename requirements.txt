@@ -170,8 +170,7 @@ pytz==2023.3
 PyYAML==6.0.2
 pyzmq==26.2.0
 
-redis==4.3.4
-
+redis==3.5.3
 
 referencing==0.35.1
 regex==2024.9.11
