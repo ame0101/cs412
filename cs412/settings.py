@@ -13,7 +13,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import environ
 import dj_database_url
+
+env = environ.Env()
+environ.Env.read_env()
 
 
 load_dotenv()
@@ -21,9 +25,9 @@ load_dotenv()
 CODEQL_PATH = os.getenv('CODEQL_PATH', '~/codeql/codeql')
 CODEQL_QUERIES_PATH = os.getenv('CODEQL_QUERIES_PATH', '~/codeql-queries')
 
-SNYK_API_TOKEN = os.getenv('SNYK_API_TOKEN')
-SNYK_ORG_ID = os.getenv('SNYK_ORG_ID')
-REDIS_URL = os.getenv('REDIS_URL')
+#SNYK_API_TOKEN = os.getenv('SNYK_API_TOKEN')
+#SNYK_ORG_ID = os.getenv('SNYK_ORG_ID')
+#REDIS_URL = os.getenv('REDIS_URL')
 DATABASE_URL=os.getenv('DATABASE_URL')
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key-for-local-dev')
@@ -122,17 +126,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "cs412.wsgi.application"
 # Default database setup
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'db',
-        'USER': 'kokor',
-        'PASSWORD': 'sammy23476',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
 
+
+DATABASES = {
+    'default': env.db('DATABASE_URL', default='postgres://localhost:5432/mydb')
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -173,7 +171,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 ## tell Django about our static resources directory:
-import os # operating system library
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
