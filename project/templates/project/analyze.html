@@ -2,37 +2,55 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">Analyze GitHub Repository</h1>
-    
+    <h1 class="text-3xl font-bold mb-6">Analyze GitHub Repository</h1>
+
+    <!-- Display error messages or success messages only if they are present -->
     {% if messages %}
-    <div class="mb-4">
         {% for message in messages %}
-        <div class="p-4 {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} rounded-lg">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    
-    <div class="max-w-2xl">
-        <form method="post" class="space-y-4">
-            {% csrf_token %}
-            <div>
-                <label class="block text-sm font-medium text-gray-700">
-                    {{ form.repository_url.label }}
-                </label>
-                {{ form.repository_url }}
-                {% if form.repository_url.help_text %}
-                <p class="mt-1 text-sm text-gray-500">{{ form.repository_url.help_text }}</p>
-                {% endif %}
-                {% if form.repository_url.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.repository_url.errors.0 }}</p>
-                {% endif %}
+            <div class="mb-4 p-4 {% if message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %} rounded-lg">
+                <p>{{ message }}</p>
             </div>
-            <button type="submit" class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                Analyze Repository
-            </button>
-        </form>
-    </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if repository %}
+        {% if repository.status == "analyzing" %}
+            <div class="mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-lg">
+                <p>Analysis in progress for <strong>{{ repository.url }}</strong>. Please check back shortly.</p>
+            </div>
+        {% elif repository.status == "completed" %}
+            <div class="mb-6 p-4 bg-green-100 text-green-800 rounded-lg">
+                <p>Repository analysis completed successfully for <strong>{{ repository.url }}</strong>.</p>
+            </div>
+        {% elif repository.status == "error" %}
+            <div class="mb-6 p-4 bg-red-100 text-red-800 rounded-lg">
+                <p>There was an error analyzing the repository <strong>{{ repository.url }}</strong>. Please try again later.</p>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="mb-6 p-4 bg-gray-100 text-gray-700 rounded-lg">
+            <p>Waiting for analysis to begin. Please provide a repository URL below.</p>
+        </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="repository_url" class="block text-sm font-medium text-gray-700 mb-2">GitHub Repository URL</label>
+            <input 
+                type="url" 
+                id="repository_url" 
+                name="repository_url" 
+                class="border-gray-300 border rounded-lg p-2 w-full" 
+                placeholder="https://github.com/owner/repository"
+                required>
+            <small class="text-gray-500">e.g., https://github.com/owner/repository</small>
+        </div>
+        <button 
+            type="submit" 
+            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+            Analyze Repository
+        </button>
+    </form>
 </div>
 {% endblock %}

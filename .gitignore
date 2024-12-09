@@ -14,3 +14,9 @@ env/
 
 # macOS metadata
 .DS_Store
+
+
+debug.log
+
+
+.python-version

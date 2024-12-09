@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-2">{{ repository.full_name }}</h1>
+        <div class="flex gap-4 text-sm text-gray-600">
+            <span>Status: 
+                <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                    Analyzing
+                </span>
+            </span>
+            <span>Last analyzed: {{ repository.last_analyzed|date:"F j, Y H:i" }}</span>
+        </div>
+    </div>
+
+    <div class="mb-8 p-4 bg-yellow-100 text-yellow-800 rounded-lg">
+        <h2 class="font-semibold text-lg">Analysis in Progress</h2>
+        <p>Your repository is currently being analyzed. Please check back shortly.</p>
+    </div>
+
+    <div class="mt-8">
+        <a href="{% url 'project:home' %}" class="inline-block px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+            ← Back to Repository Analysis
+        </a>
+    </div>
+</div>
+{% endblock %}

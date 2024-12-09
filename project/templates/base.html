@@ -10,13 +10,32 @@
     <nav class="bg-white shadow-sm">
         <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
-                <a href="{% url 'project:issue-list' %}" class="text-2xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
+                <a href="{% url 'project:home' %}" class="text-2xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
                     Crypto Issues Finder
                 </a>
-                <a href="{% url 'project:analyze' %}" 
-                   class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                    Analyze Repository
-                </a>
+                <div class="flex items-center gap-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'project:your_repos' %}" 
+                           class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                            Your Repos
+                        </a>
+                        <form method="POST" action="{% url 'project:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                                Sign Out
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'project:login' %}" 
+                           class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                            Sign In
+                        </a>
+                        <a href="{% url 'project:register' %}" 
+                           class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                            Register
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </nav>

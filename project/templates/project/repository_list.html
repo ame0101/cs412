@@ -2,20 +2,154 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold mb-6">Repositories</h1>
-  <ul class="grid gap-4">
-    {% for repository in repositories %}
-      <li class="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-        <a href="{% url 'repository_detail' repository.pk %}" class="text-xl font-semibold">{{ repository.name }}</a>
-        <p class="text-sm text-gray-600">{{ repository.url }}</p>
-        <p class="text-sm text-gray-500">Created At: {{ repository.created_at|date:"F j, Y" }}</p>
-      </li>
-    {% empty %}
-      <li class="text-center py-12 bg-gray-50 rounded-lg">
-        <h3 class="text-xl font-semibold text-gray-700 mb-2">No Repositories Found</h3>
-        <p class="text-gray-600">Start by analyzing a repository.</p>
-      </li>
-    {% endfor %}
-  </ul>
+
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold">Crypto Issues Explorer</h1>
+            <p class="text-gray-600">Explore and learn from cryptography-related issues in open-source projects.</p>
+        </div>
+        {% if user.is_authenticated %}
+
+            <!-- Analyze repos for Logged-In Users -->
+            <a href="{% url 'project:analyze' %}" 
+               class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                Analyze Your Repository
+            </a>
+        {% else %}
+
+            <!-- Login prmpt for guests -->
+            <a href="{% url 'project:login' %}" 
+               class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                Sign In to Analyze
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-2xl font-bold text-blue-600">{{ stats.total_repos }}</div>
+            <div class="text-sm text-gray-600">Total Repositories</div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-2xl font-bold text-green-600">{{ stats.low_issues }}</div>
+            <div class="text-sm text-gray-600">Low Severity</div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-2xl font-bold text-yellow-600">{{ stats.medium_issues }}</div>
+            <div class="text-sm text-gray-600">Medium Severity</div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-2xl font-bold text-orange-600">{{ stats.high_issues }}</div>
+            <div class="text-sm text-gray-600">High Severity</div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-2xl font-bold text-red-600">{{ stats.critical_issues }}</div>
+            <div class="text-sm text-gray-600">Critical Severity</div>
+        </div>
+    </div>
+
+    <!-- Filters  -->
+    <div class="mb-8">
+        <h2 class="text-xl mb-4">Filter by Severity</h2>
+        <div class="flex flex-wrap gap-2">
+            {% for value, label in severity_choices %}
+            <a href="?severity={{ value }}" 
+               class="px-4 py-2 rounded-lg {% if selected_severity == value %}bg-blue-500 text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                {{ label }}
+            </a>
+            {% endfor %}
+            {% if selected_severity %}
+            <a href="?" class="px-4 py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-600">
+                Clear Filter
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Public GitHub repos -->
+    {% if not selected_severity and not selected_language %}
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold mb-4">GitHub Repositories with Open Issues</h2>
+            <div class="grid gap-6">
+                {% for repo in github_repositories %}
+                <div class="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <a href="{% url 'project:issue_list' repo.pk %}" class="text-blue-600 hover:text-blue-800">
+                        <h3 class="text-2xl font-semibold">{{ repo.name }}</h3>
+                    </a>
+                    <p class="text-gray-600">{{ repo.description|truncatewords:20 }}</p>
+                    <p class="text-sm text-gray-500 mt-2">Open Issues: {{ repo.open_issues_count }}</p>
+                    {% if not repo.open_issues_count %}
+                        <p class="text-sm text-red-500">No issues count available</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- User repo issues -->
+    <h2 class="text-xl font-bold mb-4">User-Uploaded Repository Issues</h2>
+    <div class="grid gap-6">
+        {% for repo in repositories %}
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="text-xl font-semibold mb-1">
+                        <a href="{% url 'project:repository_detail' repo.pk %}" 
+                           class="text-blue-600 hover:text-blue-800">
+                            {{ repo.name }}
+                        </a>
+                    </h3>
+                    <p class="text-gray-600 text-sm">{{ repo.language }}</p>
+                </div>
+            </div>
+    
+            <!--Repo Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <div class="text-xl font-bold text-blue-600">{{ repo.total_issues }}</div>
+                    <div class="text-sm text-gray-600">Total Issues</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <div class="text-xl font-bold text-green-600">{{ repo.low_issues }}</div>
+                    <div class="text-sm text-gray-600">Low Severity</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <div class="text-xl font-bold text-yellow-600">{{ repo.medium_issues }}</div>
+                    <div class="text-sm text-gray-600">Medium Severity</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <div class="text-xl font-bold text-red-600">{{ repo.high_issues }}</div>
+                    <div class="text-sm text-gray-600">High Severity</div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-12 bg-gray-50 rounded-lg">
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">No Issues Found</h3>
+            <p class="text-gray-600">No issues have been uploaded to the database yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="mt-8 flex justify-center space-x-4">
+        {% if page_obj.has_previous %}
+        <a href="?{% if selected_severity %}severity={{ selected_severity }}&{% endif %}page={{ page_obj.previous_page_number }}"
+           class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+            Previous
+        </a>
+        {% endif %}
+        
+        {% if page_obj.has_next %}
+        <a href="?{% if selected_severity %}severity={{ selected_severity }}&{% endif %}page={{ page_obj.next_page_number }}"
+           class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+            Next
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-4">Your Repositories</h2>
+    {% if repositories %}
+        <div class="grid gap-6">
+            {% for repo in repositories %}
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-gray-800">{{ repo.name }}</h3>
+                    <p class="text-gray-600">{{ repo.description }}</p>
+                    <a href="{% url 'project:repository_detail' repo.pk %}?next={{ request.path }}" class="text-blue-500 hover:underline">
+                        View Details →
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-600">You haven’t uploaded any repositories yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

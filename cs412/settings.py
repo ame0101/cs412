@@ -18,8 +18,13 @@ import dj_database_url
 
 load_dotenv()
 
+CODEQL_PATH = os.getenv('CODEQL_PATH', '~/codeql/codeql')
+CODEQL_QUERIES_PATH = os.getenv('CODEQL_QUERIES_PATH', '~/codeql-queries')
 
-
+SNYK_API_TOKEN = os.getenv('SNYK_API_TOKEN')
+SNYK_ORG_ID = os.getenv('SNYK_ORG_ID')
+REDIS_URL = os.getenv('REDIS_URL')
+DATABASE_URL=os.getenv('DATABASE_URL')
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key-for-local-dev')
 
@@ -31,6 +36,9 @@ MAX_PAGE_SIZE = 100
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+
+
+
 
 
 
@@ -54,6 +62,7 @@ INSTALLED_APPS = [
     "mini_fb",
     "voter_analytics",
     "project",
+    "django_q",
 ]
 
 
@@ -114,17 +123,15 @@ TEMPLATES = [
 WSGI_APPLICATION = "cs412.wsgi.application"
 # Default database setup
 DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
-}
-
-# Fallback to SQLite if DATABASE_URL is not set
-if 'DATABASE_URL' not in os.environ:
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'db',
+        'USER': 'kokor',
+        'PASSWORD': 'sammy23476',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
-
-
+}
 
 
 # Password validation
@@ -178,6 +185,9 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+
+
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -186,25 +196,43 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {message}',
             'style': '{',
         },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
     },
     'handlers': {
-        'file': {
+        'console': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'debug.log',
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+            'handlers': ['console'],
+            'level': 'INFO',
             'propagate': True,
         },
-        '__main__': {
-            'handlers': ['file'],
+        'project': {  # Replace 'project' with your app name
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
         },
+        
     },
 }
+
+
+Q_CLUSTER = {
+    'name': 'DjangoCluster',
+    'workers': 4,
+    'recycle': 500,
+    'timeout': 60,
+    'ack_failures': True,
+    'retry': 60,
+    'orm': 'default',
+}
+
+
+LOGGING['loggers']['project']['level'] = os.getenv('DJANGO_LOG_LEVEL', 'DEBUG')
