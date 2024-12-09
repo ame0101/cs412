@@ -61,7 +61,6 @@ django-q
 environ
 
 
-
 exceptiongroup==1.2.2
 executing==2.1.0
 fastapi==0.115.5
