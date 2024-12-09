@@ -10,28 +10,20 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import environ
 import dj_database_url
-
-env = environ.Env()
-environ.Env.read_env()
-
 
 load_dotenv()
 
 CODEQL_PATH = os.getenv('CODEQL_PATH', '~/codeql/codeql')
 CODEQL_QUERIES_PATH = os.getenv('CODEQL_QUERIES_PATH', '~/codeql-queries')
 
-#SNYK_API_TOKEN = os.getenv('SNYK_API_TOKEN')
-#SNYK_ORG_ID = os.getenv('SNYK_ORG_ID')
-#REDIS_URL = os.getenv('REDIS_URL')
-DATABASE_URL=os.getenv('DATABASE_URL')
+DATABASE_URL = os.getenv('DATABASE_URL')
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key-for-local-dev')
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
