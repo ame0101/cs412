@@ -33,7 +33,8 @@ urlpatterns = [
     path('', include('mini_fb.urls')),  
     path('voter_analytics/', include('voter_analytics.urls')),
     path('', views.main_view, name='home'), 
-    path('project/', include('project.urls')),  
+    path('project/', include('project.urls', namespace='project')),
+    
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

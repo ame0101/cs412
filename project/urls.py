@@ -26,6 +26,10 @@ urlpatterns = [
     path('analyze/', views.analyze_repository_view, name='analyze_repository'),  # Analyze form page for new repositories
     path('analyze/', views.RepositoryAnalysisView.as_view(), name='analyze'),  # General analysis overview page
 
+    #path('analyze/new/', views.analyze_repository_view, name='analyze_repository'),
+   # path('analyze/overview/', views.RepositoryAnalysisView.as_view(), name='analyze'),
+
+
     # Comments Section
     path('repository/<int:pk>/add_comment/', views.add_comment, name='add_comment'),  # Add a new comment to a repository
     path('comment/delete/<int:pk>/', views.delete_comment, name='delete_comment'),  # Delete an existing comment
@@ -33,5 +37,13 @@ urlpatterns = [
     path('pending/<int:pk>/', views.pending_page, name='pending'),  # Pending page to show analysis in progress
 
     # Issues Section
-    path('repository/<int:pk>/issues/', views.issue_list_view, name='issue_list'),  # Issue list for a repository
+    path('github/<str:repo_name>/issues/', views.github_issue_list_view, name='github_issue_list'),
+    path('repository/<int:pk>/issues/', views.user_repo_issue_list_view, name='user_repo_issue_list'),
+
+
+
+
+
+    
+
 ]

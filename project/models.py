@@ -12,6 +12,8 @@ class Repository(models.Model):
         null=True,  # Allow null values for owner
         blank=True  # Allow owner to be left blank in forms
     )
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+
     name = models.CharField(max_length=200)
     url = models.URLField(unique=True)  # Ensure URLs are unique across the database
     created_at = models.DateTimeField(auto_now_add=True)
