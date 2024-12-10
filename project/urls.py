@@ -21,14 +21,11 @@ urlpatterns = [
     path('repository/<int:pk>/analyze/', views.analyze_repository, name='analyze_repository'),  # Analyze a specific repository
     path('repository/<int:pk>/delete/', views.delete_repository, name='delete_repository'),  # Delete a specific repository
     path('repository/<int:pk>/toggle_visibility/', views.toggle_visibility, name='toggle_visibility'),  # Toggle repository visibility (public/private)
+    path('repository/<int:pk>/issues/', views.user_repo_issue_list_view, name='user_repo_issue_list'),
 
     # Repository Analysis
     path('analyze/', views.analyze_repository_view, name='analyze_repository'),  # Analyze form page for new repositories
     path('analyze/', views.RepositoryAnalysisView.as_view(), name='analyze'),  # General analysis overview page
-
-    #path('analyze/new/', views.analyze_repository_view, name='analyze_repository'),
-   # path('analyze/overview/', views.RepositoryAnalysisView.as_view(), name='analyze'),
-
 
     # Comments Section
     path('repository/<int:pk>/add_comment/', views.add_comment, name='add_comment'),  # Add a new comment to a repository
