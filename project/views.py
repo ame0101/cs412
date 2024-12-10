@@ -16,6 +16,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
 from django.views.generic import ListView, FormView, DetailView, CreateView
 from rich import _console
+from django.utils.http import urlsafe_base64_decode
 
 from .forms import (
     RepositoryForm, MessageForm, IssueReportForm, RegisterForm,
@@ -114,11 +115,12 @@ def repository_list(request):
     user_uploaded_repositories = Repository.objects.filter(uploaded_by=request.user)
     
     # Repositories fetched from GitHub (uploaded_by is NULL)
-    github_repositories = Repository.objects.filter(uploaded_by__isnull=True)
+    github_repositories = Repository.objects.filter(owner=None)
     
     context = {
         'user_uploaded_repositories': user_uploaded_repositories,
         'github_repositories': github_repositories,
+        
     }
     return render(request, 'repository_list.html', context)
 
@@ -154,81 +156,82 @@ def repository_detail(request, pk):
         'next_url': next_url,
     })
 
+
 def github_issue_list_view(request, repo_name):
-    """View to display paginated GitHub issues for a repository."""
     page = int(request.GET.get('page', 1))
     per_page = 10
-    
-    # Configure GitHub API request
-    token = settings.GITHUB_TOKEN
-    api_url = f"https://api.github.com/repos/{repo_name}/issues"
-    headers = {
-        "Authorization": f"token {token}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-    params = {
-        'state': 'all',  # Get both open and closed issues
-        'per_page': per_page,
-        'page': page
-    }
-    
-    # Make API request
+
+    from .services import GitHubService
+
+    # Initialize GitHub service
+    github_service = GitHubService(settings.GITHUB_TOKEN)
+
     try:
-        response = requests.get(api_url, headers=headers, params=params)
-        response.raise_for_status()
-        
-        # Get total pages from Link header
+        # Fetch issues with pagination
+        repo_url = f"https://github.com/{repo_name}"
+        issues_url = f"https://api.github.com/repos/{repo_name}/issues"
+        params = {
+            'state': 'all',
+            'per_page': per_page,
+            'page': page
+        }
+
+        issues = github_service.fetch_issues(issues_url)
+        if not issues:
+            messages.warning(request, "No issues found for the repository.")
+            return redirect('project:home')
+
+        # Handle pagination manually for GitHub
         total_pages = 1
-        if 'Link' in response.headers:
-            links = requests.utils.parse_header_links(response.headers['Link'])
+        if 'Link' in github_service.session.headers:
+            links = requests.utils.parse_header_links(github_service.session.headers['Link'])
             for link in links:
-                if link['rel'] == 'last':
+                if link.get('rel') == 'last':
                     last_url = link['url']
                     last_page = int(re.search(r'page=(\d+)', last_url).group(1))
-                    total_pages = min(10, last_page)  # Cap at 10 pages
-        
-        issues = response.json()
-        
-        # Create custom paginator class for GitHub pagination
+                    total_pages = min(10, last_page)
+
+        # Custom paginator for GitHub
         class GitHubPaginator:
             def __init__(self, current_page, total_pages):
                 self.number = current_page
                 self.num_pages = total_pages
-                
+
             def page_range(self):
                 return range(1, self.num_pages + 1)
-                
+
             @property
             def has_next(self):
                 return self.number < self.num_pages
-                
+
             @property
             def has_previous(self):
                 return self.number > 1
-                
+
             def next_page_number(self):
                 return self.number + 1
-                
+
             def previous_page_number(self):
                 return self.number - 1
-        
+
         paginator = GitHubPaginator(page, total_pages)
-        
+
         context = {
             'repo_name': repo_name,
-            'issues': issues,
+            'issues': issues[(page - 1) * per_page:page * per_page],  # Paginate issues
             'page_obj': paginator,
             'is_paginated': total_pages > 1
         }
-        
+
         return render(request, 'project/github_issue_list.html', context)
-        
+
     except requests.RequestException as e:
         messages.error(request, f"Failed to fetch issues: {str(e)}")
         return redirect('project:home')
 
 
-    
+
+
 def user_repo_issue_list_view(request, pk):
     repository = get_object_or_404(Repository, pk=pk)
 
@@ -252,12 +255,30 @@ def user_repo_issue_list_view(request, pk):
         ('critical', 'Critical'),
     ]
 
-    return render(request, 'project/user_repo_issue_list.html', {
+    # Calculate the stats for the repository
+    total_issues = issues.count()
+    low_issues = issues.filter(severity='low').count()
+    medium_issues = issues.filter(severity='medium').count()
+    high_issues = issues.filter(severity='high').count()
+    critical_issues = issues.filter(severity='critical').count()
+
+    context = {
         'repository': repository,
         'page_obj': page_obj,
         'severity_choices': severity_choices,
         'selected_severity': severity_filter,
-    })
+        'stats': {
+            'total_issues': total_issues,
+            'low_issues': low_issues,
+            'medium_issues': medium_issues,
+            'high_issues': high_issues,
+            'critical_issues': critical_issues
+        }
+    }
+
+    return render(request, 'project/user_repo_issue_list.html', context)
+    
+
 
 # Class-based view for creating messages
 class MessageCreateView(CreateView):
@@ -502,19 +523,33 @@ class RepositoryDetailView(ListView):
        }
         return context
 
+
+
 def github_issue_list_view(request, repo_name):
-    # Fetch issues for the GitHub repository using the GitHub API
-    repo_full_name = repo_name
+    """
+    View to fetch and display issues for a GitHub repository using the GitHub API.
+    Decodes the base64-encoded repo_name into the owner/repo format.
+    """
+    try:
+        # Decode base64 encoded repo_name
+        decoded_name = urlsafe_base64_decode(repo_name).decode()
+        owner, repo = decoded_name.split('/')
+    except Exception as e:
+        messages.error(request, "Invalid Repository")
+        return redirect('project:home')
+
+    # Fetch issues
     token = settings.GITHUB_TOKEN
-    
     page_number = request.GET.get('page', 1)
-    issues = fetch_github_issues(repo_full_name, token, page_number)
-    
+    issues = fetch_github_issues(f"{owner}/{repo}", token, page_number)
+
+    # Paginate issues
     paginator = Paginator(issues, 10)  # Show 10 issues per page
     page_obj = paginator.get_page(page_number)
-    
+
+    # Render the template
     return render(request, 'project/github_issue_list.html', {
-        'repo_name': repo_name,
+        'repo_name': f"{owner}/{repo}",
         'issues': page_obj,
     })
 
@@ -553,108 +588,118 @@ def fetch_and_cache_github_repositories():
 def homepage(request):
     """Homepage view to show repos, filters, and stats."""
     logger.info("INFO: Homepage function accessed.")
-   
-    # Check for cached GitHub repos updated in last 2 weeks
+
+    # Check for cached GitHub repos updated in the last 2 weeks
     two_weeks_ago = now() - timedelta(weeks=2)
     cached_repositories = CachedGitHubRepository.objects.filter(last_updated__gte=two_weeks_ago)
+
     # Paginate GitHub-fetched repositories
     github_paginator = Paginator(cached_repositories, 10)  # Show 10 repositories per page
     github_page_number = request.GET.get('github_page')
     github_page_obj = github_paginator.get_page(github_page_number)
+
     if not cached_repositories.exists():
-       logger.info("INFO: No recent cached repositories found. Fetching from GitHub API.")
-       token = settings.GITHUB_TOKEN
-       github_service = GitHubService(token)
+        logger.info("INFO: No recent cached repositories found. Fetching from GitHub API.")
+        token = settings.GITHUB_TOKEN
+        github_service = GitHubService(token)
 
-       try:
-           github_repositories = github_service.fetch_repositories()
-           logger.info(f"INFO: Fetched {len(github_repositories)} GitHub repositories.")
+        try:
+            github_repositories = github_service.fetch_repositories()
+            logger.info(f"INFO: Fetched {len(github_repositories)} GitHub repositories.")
 
-           # Remove old data and save new
-           CachedGitHubRepository.objects.all().delete()
-           for repo in github_repositories:
-               CachedGitHubRepository.objects.create(
-                   name=repo['name'],
-                   description=repo['description'],
-                   html_url=repo['html_url'],
-                   open_issues_count=repo['open_issues_count'],
-               )
-           cached_repositories = CachedGitHubRepository.objects.all()  # Refresh data
-           logger.info(f"INFO: Successfully cached {cached_repositories.count()} repositories.")
-       except Exception as e:
-           logger.error(f"ERROR: Failed to fetch GitHub repositories: {e}")
-           cached_repositories = CachedGitHubRepository.objects.none()  # Empty data set
+            # Remove old data and save new
+            CachedGitHubRepository.objects.all().delete()
+            for repo in github_repositories:
+                owner = repo['owner']['login']  # Extract owner
+                CachedGitHubRepository.objects.create(
+                    owner=owner,
+                    name=repo['name'],
+                    description=repo['description'],
+                    html_url=repo['html_url'],
+                    open_issues_count=repo['open_issues_count'],
+                )
+            cached_repositories = CachedGitHubRepository.objects.all()  # Refresh data
+            logger.info(f"INFO: Successfully cached {cached_repositories.count()} repositories.")
+        except Exception as e:
+            logger.error(f"ERROR: Failed to fetch GitHub repositories: {e}")
+            cached_repositories = CachedGitHubRepository.objects.none()  # Empty data set
 
-   # Apply filters for user repos
+    for repo in cached_repositories:
+        if repo.formatted_name:
+            logger.debug(f"Repo: {repo.name}, Formatted Name: {repo.formatted_name}")
+        else:
+            logger.warning(f"Repo {repo.name} is missing owner or name: Owner: {repo.owner}, Name: {repo.name}")
+
+    # Apply filters for user repos
     severity_filter = request.GET.get('severity')
     language_filter = request.GET.get('language')
 
     repositories = Repository.objects.filter(status='completed')
     if severity_filter:
-       logger.debug(f"DEBUG: Applying severity filter: {severity_filter}")
-       repositories = repositories.filter(issues__severity=severity_filter).distinct()
+        logger.debug(f"DEBUG: Applying severity filter: {severity_filter}")
+        repositories = repositories.filter(issues__severity=severity_filter).distinct()
     if language_filter:
-       logger.debug(f"DEBUG: Applying language filter: {language_filter}")
-       repositories = repositories.filter(language=language_filter).distinct()
+        logger.debug(f"DEBUG: Applying language filter: {language_filter}")
+        repositories = repositories.filter(language=language_filter).distinct()
 
     # Add stats for each repo
     for repo in repositories:
-       repo.total_issues = CryptoIssue.objects.filter(repository=repo).count()
-       repo.low_issues = CryptoIssue.objects.filter(repository=repo, severity='low').count()
-       repo.medium_issues = CryptoIssue.objects.filter(repository=repo, severity='medium').count()
-       repo.high_issues = CryptoIssue.objects.filter(repository=repo, severity='high').count()
-       repo.critical_issues = CryptoIssue.objects.filter(repository=repo, severity='critical').count()
+        repo.total_issues = CryptoIssue.objects.filter(repository=repo).count()
+        repo.low_issues = CryptoIssue.objects.filter(repository=repo, severity='low').count()
+        repo.medium_issues = CryptoIssue.objects.filter(repository=repo, severity='medium').count()
+        repo.high_issues = CryptoIssue.objects.filter(repository=repo, severity='high').count()
+        repo.critical_issues = CryptoIssue.objects.filter(repository=repo, severity='critical').count()
 
     # Paginate results
     page = request.GET.get('page', 1)
     paginator = Paginator(repositories, 10)
     try:
-       repositories = paginator.page(page)
+        repositories = paginator.page(page)
     except PageNotAnInteger:
-       repositories = paginator.page(1)
+        repositories = paginator.page(1)
     except EmptyPage:
-       repositories = paginator.page(paginator.num_pages)
+        repositories = paginator.page(paginator.num_pages)
 
     # Prepare context data
     context = {
-       'github_repositories': cached_repositories,
-       'repositories': repositories,
-       'severity_choices': [
-           ('low', 'Low'),
-           ('medium', 'Medium'),
-           ('high', 'High'),
-           ('critical', 'Critical'),
-       ],
-       'language_choices': [
-           ('python', 'Python'),
-           ('javascript', 'JavaScript'),
-           ('java', 'Java'),
-           ('go', 'Go'),
-           ('ruby', 'Ruby'),
-           ('php', 'PHP'),
-           ('c++', 'C++'),
-           ('c', 'C'),
-           ('typescript', 'TypeScript'),
-           ('swift', 'Swift'),
-           ('scala', 'Scala'),
-       ],
-       'selected_severity': severity_filter or '',
-       'selected_language': language_filter or '',
-       'stats': {
-           'total_repos': Repository.objects.filter(status='completed').count(),
-           'low_issues': CryptoIssue.objects.filter(severity='low').count(),
-           'medium_issues': CryptoIssue.objects.filter(severity='medium').count(),
-           'high_issues': CryptoIssue.objects.filter(severity='high').count(),
-           'critical_issues': CryptoIssue.objects.filter(severity='critical').count(),
-       },
+        'github_repositories': github_page_obj,  # Pass paginated GitHub repositories
+        'repositories': repositories,
+        'severity_choices': [
+            ('low', 'Low'),
+            ('medium', 'Medium'),
+            ('high', 'High'),
+            ('critical', 'Critical'),
+        ],
+        'language_choices': [
+            ('python', 'Python'),
+            ('javascript', 'JavaScript'),
+            ('java', 'Java'),
+            ('go', 'Go'),
+            ('ruby', 'Ruby'),
+            ('php', 'PHP'),
+            ('c++', 'C++'),
+            ('c', 'C'),
+            ('typescript', 'TypeScript'),
+            ('swift', 'Swift'),
+            ('scala', 'Scala'),
+        ],
+        'selected_severity': severity_filter or '',
+        'selected_language': language_filter or '',
+        'stats': {
+            'total_repos': Repository.objects.filter(status='completed').count(),
+            'low_issues': CryptoIssue.objects.filter(severity='low').count(),
+            'medium_issues': CryptoIssue.objects.filter(severity='medium').count(),
+            'high_issues': CryptoIssue.objects.filter(severity='high').count(),
+            'critical_issues': CryptoIssue.objects.filter(severity='critical').count(),
+        },
         'github_page_obj': github_page_obj,
         'is_paginated': paginator.num_pages > 1,
         'page_obj': repositories,
-   }
+        
+    }
 
     logger.debug(f"DEBUG: Homepage context prepared with {repositories.paginator.count} repositories total.")
     return render(request, 'project/repository_list.html', context)
-
 
 def delete_repository(request, pk):
    repository = get_object_or_404(Repository, pk=pk)

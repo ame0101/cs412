@@ -8,7 +8,7 @@
             {% for repo in repositories %}
                 <div class="bg-white p-4 rounded-lg shadow">
                     <h3 class="text-xl font-semibold text-gray-800">{{ repo.name }}</h3>
-                    <p class="text-gray-600">{{ repo.description }}</p>
+
                     <a href="{% url 'project:repository_detail' repo.pk %}?next={{ request.path }}" class="text-blue-500 hover:underline">
                         View Details →
                     </a>

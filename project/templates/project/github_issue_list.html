@@ -2,84 +2,64 @@
 {% block content %}
 
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-4">{{ repo_name }} - Issues</h1>
+  <h1 class="text-3xl font-bold mb-4">{{ repo_name }} - Issues</h1>
 
-    <div class="grid gap-6">
-        {% for issue in issues %}
-            <div class="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex justify-between items-start">
-                    <h3 class="text-xl font-semibold mb-2">
-                        <a href="{{ issue.html_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">
-                            {{ issue.title }}
-                        </a>
-                    </h3>
-                    <span class="px-3 py-1 rounded-full text-sm {% if issue.state == 'open' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                        {{ issue.state|title }}
-                    </span>
-                </div>
-
-                {% if issue.body %}
-                <div class="mt-2 text-gray-600">
-                    {{ issue.body|truncatewords:50 }}
-                </div>
-                {% endif %}
-
-                <div class="mt-4 text-sm text-gray-500">
-                    #{{ issue.number }} opened on {{ issue.created_at|date:"M d, Y" }}
-                    {% if issue.user %}
-                    by <span class="font-medium">{{ issue.user.login }}</span>
-                    {% endif %}
-                </div>
-
-                <div class="mt-4 space-x-2">
-                    <a href="{{ issue.html_url }}" 
-                       target="_blank" 
-                       class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                        View on GitHub
-                    </a>
-                </div>
-            </div>
-        {% empty %}
-            <div class="text-center py-8 text-gray-600">
-                No issues found for this repository.
-            </div>
-        {% endfor %}
-    </div>
-
-    {% if is_paginated %}
-        <div class="mt-8 flex justify-center space-x-2">
-            {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" 
-                   class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-                    Previous
-                </a>
-            {% endif %}
-
-            {% for num in page_obj.page_range %}
-                <a href="?page={{ num }}" 
-                   class="px-4 py-2 rounded-lg {% if page_obj.number == num %}bg-blue-500 text-white{% else %}bg-gray-100 hover:bg-gray-200{% endif %}">
-                    {{ num }}
-                </a>
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" 
-                   class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-                    Next
-                </a>
-            {% endif %}
-        </div>
-    {% endif %}
-
-    <div class="mt-8">
-        <a href="{% url 'project:home' %}" 
-           class="inline-block px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-            ← Back to Repository Analysis
+  {% if issues %}
+  <div class="grid gap-6">
+    {% for issue in issues %}
+    <div class="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex justify-between items-start">
+        <a href="{{ issue.html_url }}" class="text-blue-600 hover:text-blue-800" target="_blank">
+          <h3 class="text-xl font-semibold mb-2">{{ issue.title }}</h3>
         </a>
+        <span class="px-3 py-1 rounded-full text-sm {% if issue.state == 'open' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+          {{ issue.state|title }}
+        </span>
+      </div>
+
+      {% if issue.body %}
+      <p class="mt-2 text-gray-600">{{ issue.body|truncatewords:50 }}</p>
+      {% endif %}
+
+      <div class="mt-4 text-sm text-gray-500">
+        #{{ issue.number }} opened on {{ issue.created_at|date:"M d, Y" }}
+        {% if issue.user %} by <a href="{{ issue.user.html_url }}" class="font-medium" target="_blank">{{ issue.user.login }}</a>{% endif %}
+      </div>
+
+      <div class="mt-4 space-x-2">
+        <a href="{{ issue.html_url }}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" target="_blank">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          View on GitHub
+        </a>
+      </div>
     </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-8 text-gray-600">
+    No issues found for this repository.
+  </div>
+  {% endif %}
+
+  {% if is_paginated %}
+  <div class="mt-8 flex justify-center space-x-2">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Previous</a>
+    {% endif %}
+    {% for num in page_obj.page_range %}
+    <a href="?page={{ num }}" class="px-4 py-2 rounded-lg {% if page_obj.number == num %}bg-blue-500 text-white{% else %}bg-gray-100 hover:bg-gray-200{% endif %}">{{ num }}</a>
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Next</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="mt-8">
+    <a href="{% url 'project:home' %}" class="inline-block px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">← Back to Repository Analysis</a>
+  </div>
 </div>
 
 {% endblock %}

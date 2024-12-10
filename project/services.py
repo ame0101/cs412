@@ -12,7 +12,7 @@ from django.utils.timezone import now
 from django.conf import settings
 from django.db import IntegrityError
 from django.core.cache import cache
-from .models import Repository, CryptoIssue
+from .models import Repository, CryptoIssue, GitHubRepository
 import logging
 
 logger = logging.getLogger(__name__)
@@ -376,52 +376,55 @@ class GitHubService:
             "Accept": "application/vnd.github.v3+json",
         }
 
-    # Fetch issues for a specific repository
-    def fetch_issues(self, repo_full_name):
+    def fetch_issues(self, repo_url):
         """
-        Fetch issues for a specific repository from GitHub and cache the results.
+        Fetch issues for a specific GitHub repository and cache the results.
 
-        :param repo_full_name: The full name of the repository (e.g., 'owner/repo').
+        :param repo_url: The full URL of the GitHub repository.
         :return: List of issues for the repository.
         """
-        cache_key = f"github_issues_{repo_full_name}"
+        cache_key = f"github_issues_{repo_url}"
         cached_issues = cache.get(cache_key)
         if cached_issues:
-            logger.info(f"Using cached issues for repository {repo_full_name}.")
+            logger.info(f"Using cached issues for repository {repo_url}.")
             return cached_issues
 
-        url = f"https://api.github.com/repos/{repo_full_name}/issues"
-        logger.debug(f"Fetching issues from {url} with headers: {self.headers}")
+        # Convert GitHub web URL to API URL
+        repo_name = repo_url.replace("https://github.com/", "")
+        issues_url = f"https://api.github.com/repos/{repo_name}/issues"
 
-        response = self.session.get(url, headers=self.headers)
+        logger.debug(f"Fetching issues from {issues_url} with headers: {self.headers}")
+        response = self.session.get(issues_url, headers=self.headers)
 
-        # Handle non-200 responses
         if response.status_code != 200:
-            logger.error(f"Failed to fetch issues for {repo_full_name}: {response.status_code}")
-            logger.error(f"Response: {response.json()}")
+            logger.error(f"Failed to fetch issues for {repo_url}: {response.status_code}")
+            logger.error(f"Response: {response.text}")  # Avoid .json() to handle non-JSON responses gracefully
             return []
 
-        issues_data = response.json()
-        logger.info(f"Fetched {len(issues_data)} issues for repository {repo_full_name}.")
+        try:
+            issues_data = response.json()
+        except ValueError as e:
+            logger.error(f"Error decoding JSON response for {repo_url}: {e}")
+            return []
+
+        logger.info(f"Fetched {len(issues_data)} issues for repository {repo_url}.")
 
         # Cache issues for 1 week
-        cache.set(cache_key, issues_data, timeout=60 * 60 * 24 * 7)  # Cache for 1 week
-        logger.debug(f"Cached issues for repository {repo_full_name} with key {cache_key}.")
+        cache.set(cache_key, issues_data, timeout=60 * 60 * 24 * 7)
+        logger.debug(f"Cached issues for repository {repo_url} with key {cache_key}.")
 
         return issues_data
-    
+
     def fetch_repositories(self):
         url = "https://api.github.com/search/repositories?q=is:open+issue&sort=created&order=desc"
         etag = cache.get('github_repos_etag')
-        
         headers = self.headers.copy()
         if etag:
             headers['If-None-Match'] = etag
-        
+
         logger.debug(f"Fetching repositories from {url} with headers: {headers}")
-        
         response = self.session.get(url, headers=headers)
-        
+
         # Handle 304 Not Modified (cached data is up-to-date)
         if response.status_code == 304:
             logger.info("No changes detected. Using cached repositories.")
@@ -429,37 +432,30 @@ class GitHubService:
             if not cached_repos:
                 logger.warning("No cached repositories found despite 304 response.")
             return cached_repos
-        
-        # Handle non-200 responses
+
         if response.status_code != 200:
             logger.error(f"Failed to fetch repositories: {response.status_code}")
             logger.error(f"Response: {response.json()}")
             return []
-        
-        # Extract repositories data
+
         repos_data = response.json().get('items', [])
         logger.info(f"Fetched {len(repos_data)} repositories from GitHub.")
-        
-        # Save repositories to the database
         for repo_data in repos_data:
             owner_data = repo_data.get('owner')
             if not owner_data or not owner_data.get('login'):
                 logger.error(f"Repository '{repo_data.get('name')}' is missing valid owner data.")
-                continue  # Skip repositories with invalid owner data
-            
-            # Extract necessary fields
+                continue
+
             owner = owner_data['login']
             repo_name = repo_data['name']
             html_url = repo_data['html_url']
-            description = repo_data.get('description', '')
-            
+
             try:
-                Repository.objects.update_or_create(
-                    url=html_url,  # Use `url` as the unique identifier
+                GitHubRepository.objects.update_or_create(
+                    url=html_url,
                     defaults={
-                        "owner": owner,  # Store the GitHub username of the owner
                         "name": repo_name,
-                        "description": description,
+                        "description": repo_data.get('description', ''),
                         "stars": repo_data.get('stargazers_count', 0),
                         "language": repo_data.get('language', ''),
                         "status": 'completed',
@@ -469,16 +465,3 @@ class GitHubService:
                 logger.debug(f"Saved repository: {repo_name}")
             except Exception as e:
                 logger.error(f"Error saving repository {repo_name}: {e}")
-        
-        # Cache the repositories and the ETag for 1 day (24 hours)
-        one_day_seconds = 60 * 60 * 24
-        
-        # Cache repositories
-        cache.set('github_repositories', repos_data, timeout=one_day_seconds)
-        logger.debug("Cached repositories successfully.")
-        
-        # Cache ETag
-        cache.set('github_repos_etag', response.headers.get('ETag'), timeout=one_day_seconds)
-        logger.debug(f"Cached ETag: {response.headers.get('ETag')}")
-        
-        return repos_data

@@ -37,8 +37,8 @@ urlpatterns = [
     path('pending/<int:pk>/', views.pending_page, name='pending'),  # Pending page to show analysis in progress
 
     # Issues Section
-    path('github/<str:repo_name>/issues/', views.github_issue_list_view, name='github_issue_list'),
-    path('repository/<int:pk>/issues/', views.user_repo_issue_list_view, name='user_repo_issue_list'),
+    path('issues/<str:repo_name>/', views.github_issue_list_view, name='github_issue_list'),
+
 
 
 

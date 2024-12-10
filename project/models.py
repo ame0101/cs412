@@ -3,6 +3,11 @@ from django.utils.timezone import now
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
 from hashlib import sha256
+from django.utils.http import urlsafe_base64_encode
+
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils.timezone import now
 
 class Repository(models.Model):
     owner = models.ForeignKey(
@@ -13,6 +18,7 @@ class Repository(models.Model):
         blank=True  # Allow owner to be left blank in forms
     )
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
 
     name = models.CharField(max_length=200)
     url = models.URLField(unique=True)  # Ensure URLs are unique across the database
@@ -61,6 +67,33 @@ class Repository(models.Model):
         self.visibility = 'private' if self.visibility == 'public' else 'public'
         self.save()
 
+
+class GitHubRepository(models.Model):
+    url = models.URLField(unique=True)  # Store the full GitHub repository URL
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    stars = models.IntegerField(default=0)
+    language = models.CharField(max_length=50, blank=True, null=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('analyzing', 'Analyzing'),
+            ('completed', 'Completed'),
+            ('error', 'Error')
+        ],
+        default='pending',
+    )
+    error_message = models.TextField(blank=True)
+    visibility = models.CharField(
+        max_length=10,
+        choices=[('public', 'Public'), ('private', 'Private')],
+        default='public',
+    )
+    last_analyzed = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
 class Comment(models.Model):
     repository = models.ForeignKey(Repository, related_name="comments", on_delete=models.CASCADE)
@@ -112,6 +145,7 @@ class Comment(models.Model):
 
 
 class CachedGitHubRepository(models.Model):
+    owner = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     html_url = models.URLField()
@@ -122,8 +156,15 @@ class CachedGitHubRepository(models.Model):
         ordering = ['-last_updated']  # Latest updated repositories first
 
     def __str__(self):
-        return self.name
+        return f"{self.owner}/{self.name}"  # Updated to display as owner/repo
 
+    @property
+    def formatted_name(self):
+        """Return a base64 encoded version of owner/repo."""
+        if self.owner and self.name:
+            raw_name = f"{self.owner}/{self.name}"
+            return urlsafe_base64_encode(raw_name.encode()) 
+        return ""
 
 class CryptoIssue(models.Model):
     repository = models.ForeignKey('Repository', on_delete=models.CASCADE, related_name='issues')
