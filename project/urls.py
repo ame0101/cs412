@@ -1,5 +1,3 @@
-
-
 from django.urls import path
 from . import views
 from .views import RepositoryDetailView
@@ -21,11 +19,11 @@ urlpatterns = [
     path('repository/<int:pk>/analyze/', views.analyze_repository, name='analyze_repository'),  # Analyze a specific repository
     path('repository/<int:pk>/delete/', views.delete_repository, name='delete_repository'),  # Delete a specific repository
     path('repository/<int:pk>/toggle_visibility/', views.toggle_visibility, name='toggle_visibility'),  # Toggle repository visibility (public/private)
-    path('repository/<int:pk>/issues/', views.user_repo_issue_list_view, name='user_repo_issue_list'),
 
     # Repository Analysis
     path('analyze/', views.analyze_repository_view, name='analyze_repository'),  # Analyze form page for new repositories
     path('analyze/', views.RepositoryAnalysisView.as_view(), name='analyze'),  # General analysis overview page
+
 
     # Comments Section
     path('repository/<int:pk>/add_comment/', views.add_comment, name='add_comment'),  # Add a new comment to a repository
@@ -34,6 +32,7 @@ urlpatterns = [
     path('pending/<int:pk>/', views.pending_page, name='pending'),  # Pending page to show analysis in progress
 
     # Issues Section
+    path('repository/<int:pk>/issues/', views.user_repo_issue_list_view, name='user_repo_issue_list'),
     path('issues/<str:repo_name>/', views.github_issue_list_view, name='github_issue_list'),
 
 

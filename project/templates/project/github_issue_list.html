@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 
+
+
+<!-- Because of separate logistical handling, github issue lists are separate -->
+<!-- This is displaying Github Issue previews rather than analysis -->
+
 <div class="container mx-auto px-4 py-8">
   <h1 class="text-3xl font-bold mb-4">{{ repo_name }} - Issues</h1>
 
@@ -12,6 +17,9 @@
         <a href="{{ issue.html_url }}" class="text-blue-600 hover:text-blue-800" target="_blank">
           <h3 class="text-xl font-semibold mb-2">{{ issue.title }}</h3>
         </a>
+
+        
+        <!-- Issue card -->
         <span class="px-3 py-1 rounded-full text-sm {% if issue.state == 'open' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
           {{ issue.state|title }}
         </span>
@@ -43,6 +51,7 @@
   </div>
   {% endif %}
 
+  <!-- Paginate -->
   {% if is_paginated %}
   <div class="mt-8 flex justify-center space-x-2">
     {% if page_obj.has_previous %}

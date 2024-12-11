@@ -1,6 +1,7 @@
 {% extends "base.html" %}   
 {% block content %} 
     
+<!-- Upload success or failure -->
 <div class="container mx-auto px-4 py-8">   
   {% if messages %} 
     <div class="mb-4">    
@@ -11,6 +12,9 @@
     {% endfor %}    
   </div>    
   {% endif %}   
+
+
+  <!-- Repository status in case repo is big -->
   
   <div class="mb-8">    
         <h1 class="text-3xl font-bold mb-2">{{ repository.full_name }}</h1> 
@@ -24,8 +28,6 @@
   </div>    
     
   
-  
-    
   
   {% if repository.owner == user %} 
   <div class="mb-8 flex gap-4"> 
@@ -86,7 +88,7 @@
   </div>    
 </div>  
     
-<!-- Edit Modal --> 
+<!-- Edit Modals for editing comments --> 
 <div id="editModal" class="fixed z-50 inset-0 hidden flex items-center justify-center bg-black bg-opacity-50">  
   <div class="bg-white p-6 rounded-lg shadow-lg w-96">  
     <h2 class="text-xl font-semibold mb-4">Edit Comment</h2>    

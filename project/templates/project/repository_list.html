@@ -7,13 +7,14 @@
            <h1 class="text-3xl font-bold">Crypto Issues Explorer</h1>
            <p>Explore and learn from cryptography-related issues in open-source projects.</p>
        </div>
+       <!--  Only can analyze if signed in bc of toggling -->
        {% if user.is_authenticated %}
        <a href="{% url 'project:analyze' %}" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Analyze Your Repository</a>
        {% else %}
        <a href="{% url 'project:login' %}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Sign In to Analyze</a>
        {% endif %}
    </div>
-
+    <!-- Stats cards  -->
    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
        <div class="bg-white p-4 rounded-lg shadow">
            <div class="text-2xl font-bold text-blue-600">{{ stats.total_repos }}</div>
@@ -52,6 +53,7 @@
    {% if not selected_severity and not selected_language %}
    <div class="mt-8">
        <h2 class="text-xl font-semibold mb-4">GitHub Repositories with Open Issues</h2>
+       <h4 class="text-xl font-semibold mb-4">Find what piques your interest, and contribute!</h4>
        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
         {% for repo in github_page_obj %}
         <div class="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -59,16 +61,18 @@
             <a href="{% url 'project:github_issue_list' repo_name=repo.formatted_name %}" class="text-blue-600 hover:text-blue-800">
                 <h3 class="text-xl font-semibold">{{ repo.name }}</h3>
             </a>
+            <!-- In case the URL is processed incorrectly -->
             {% else %}
             <h3 class="text-xl font-semibold text-gray-500">Invalid Repository</h3>
             {% endif %}
         
+            <!-- Unresolved issues in the repo the user could contribute to  -->
             <p>{{ repo.description|truncatewords:20 }}</p>
             <p>Open Issues: {{ repo.open_issues_count }}</p>
         </div>
         {% endfor %}
        </div>
-
+       <!-- Paginate  -->
        {% if github_page_obj.has_other_pages %}
        <div class="mt-8 flex justify-center space-x-4">
            {% if github_page_obj.has_previous %}
@@ -82,6 +86,7 @@
    </div>
    {% endif %}
 
+   <!-- Multi-user functunality with public/ private toggling and features -->
    <h2 class="text-xl font-bold mb-4">User-Uploaded Repository Issues</h2>
    <div class="grid gap-6">
        {% for repo in repositories %}

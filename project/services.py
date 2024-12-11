@@ -18,7 +18,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 class CryptoAnalyzer:
+    """
+    Performs static analysis on GitHub repositories to detect potential 
+    cryptography-related issues.
+    """
+
     def __init__(self, github_token, user=None):
+        """
+        Initialize the CryptoAnalyzer with a GitHub access token and optional user.
+        
+        Args:
+            github_token (str): The GitHub access token for making API requests.
+            user (User, optional): The user associated with the analysis. 
+                                    Defaults to None.
+        """
         self.token = github_token
         self.user = user
         self.headers = {'Authorization': f'token {github_token}'}
@@ -26,6 +39,18 @@ class CryptoAnalyzer:
         self.semaphore = asyncio.Semaphore(10)  # Limit concurrent requests
 
     def analyze_repository(self, repo_url):
+        """
+        Analyze a GitHub repository for potential cryptography-related issues.
+        
+        Args:
+            repo_url (str): The URL of the GitHub repository to analyze.
+        
+        Returns:
+            Repository: The analyzed repository object.
+        
+        Raises:
+            ValueError: If the repository URL is invalid, not found, or empty.
+        """
         logger.info(f"Starting analysis for repository: {repo_url}")
         repo = None  # Initialize repo to None
 
@@ -33,7 +58,7 @@ class CryptoAnalyzer:
             # Owner and name from the URL
             match = re.match(r'https://github.com/([^/]+)/([^/]+)', repo_url)
             if not match:
-                raise ValueError("Invalid xGitHub repository URL format.")
+                raise ValueError("Invalid GitHub repository URL format.")
 
             owner, name = match.groups()
 
@@ -90,12 +115,21 @@ class CryptoAnalyzer:
             logger.error(f"Unexpected error analyzing repository {repo_url}: {str(e)}", exc_info=True)
             if repo:
                 repo.status = 'error'
-                repo.error_message = str(e)
+                repo.error_message = str(e) 
                 repo.save()
             raise
 
     async def analyze_contents_async(self, repo, contents_url, path_prefix=''):
-        """Analyze the contents of a repository asynchronously."""
+        """
+        Analyze the contents of a repository asynchronously using 
+        static analysis methods.
+        
+        Args:
+            repo (Repository): The repository being analyzed.
+            contents_url (str): The URL to fetch the repository contents.
+            path_prefix (str, optional): The prefix path for nested contents.
+                                         Defaults to ''.
+        """
         logger.info(f"Fetching contents from: {contents_url}")
         try:
             async with self.semaphore:
@@ -129,6 +163,14 @@ class CryptoAnalyzer:
             logger.error(f"Error analyzing contents at {contents_url}: {e}", exc_info=True)
 
     async def analyze_file_async(self, repo, file_info, file_path):
+        """
+        Analyze an individual file asynchronously.
+        
+        Args:
+            repo (Repository): The repository being analyzed.
+            file_info (dict): The file information from the GitHub API.
+            file_path (str): The file path within the repository.
+        """
         retries = 3
         for attempt in range(retries):
             try:
@@ -157,6 +199,14 @@ class CryptoAnalyzer:
                     logger.error(f"Failed to analyze file {file_path} after {retries} attempts.", exc_info=True)
 
     async def _analyze_python_content(self, repo, file_path, content):
+        """
+        Analyze the contents of a Python file.
+        
+        Args:
+            repo (Repository): The repository being analyzed. 
+            file_path (str): The file path within the repository.
+            content (str): The file content as a string.
+        """
         try:
             logger.info(f"Analyzing Python content for file: {file_path}")
             tree = ast.parse(content)
@@ -165,10 +215,27 @@ class CryptoAnalyzer:
             logger.error(f"Syntax error in Python file {file_path}: {str(e)}", exc_info=True)
 
     def _analyze_go_content(self, repo, file_path, content):
+        """
+        Analyze the contents of a Go file.
+        
+        Args:
+            repo (Repository): The repository being analyzed.
+            file_path (str): The file path within the repository. 
+            content (str): The file content as a string.
+        """
         logger.info(f"Analyzing Go content for file: {file_path}")
         # Stub for Go analysis logic
 
     def _is_analyzable_file(self, filename):
+        """
+        Check if a file is analyzable based on its extension.
+        
+        Args:
+            filename (str): The name of the file.
+        
+        Returns:
+            bool: True if the file is analyzable, False otherwise.
+        """
         extensions = (
             '.py', '.js', '.java', '.go', '.rb', '.php',
             '.cpp', '.c', '.h', '.cs', '.ts', '.swift',
@@ -176,8 +243,15 @@ class CryptoAnalyzer:
         )
         return filename.lower().endswith(extensions)
  
- 
     async def _analyze_content(self, repo, file_path, content):
+        """
+        Analyze the content of a file for potential cryptography-related issues.
+        
+        Args:
+            repo (Repository): The repository being analyzed.
+            file_path (str): The file path within the repository.
+            content (str): The file content as a string.
+        """
         try:
             issues = []
             tree = ast.parse(content)
@@ -191,7 +265,7 @@ class CryptoAnalyzer:
                     elif node.func.id in ['random', 'Math.random', 'rand', 'srand']:
                         issue = await self._create_issue(repo, file_path, node, 'unsafe_random', 'Potentially unsafe random number generation')
                         if issue:
-                            issues.append(issue)
+                            issues.append(issue)  
                     elif node.func.id == 'ECB':
                         issue = await self._create_issue(repo, file_path, node, 'insecure_mode', 'Insecure mode of operation (ECB) detected')
                         if issue:
@@ -201,7 +275,7 @@ class CryptoAnalyzer:
                         if issue:
                             issues.append(issue)
                     elif node.func.id == 'exec':
-                        issue = await self._create_issue(repo, file_path, node, 'command_injection', 'Potential command injection vulnerability detected')
+                        issue = await self._create_issue(repo, file_path, node, 'command_injection', 'Potential command injection vulnerability detected')  
                         if issue:
                             issues.append(issue)
                 elif isinstance(node, ast.Assign):
@@ -232,15 +306,19 @@ class CryptoAnalyzer:
                         issues.append(issue)
 
             if issues:
-                # Now using sync_to_async for database operations
                 await self._handle_issues_bulk(issues)
 
         except Exception as e:
             logger.error(f"Error analyzing content for {file_path}: {str(e)}", exc_info=True)
 
-    # Wrap the ORM method to run in an async context
     @sync_to_async
     def _handle_issues_bulk(self, issues):
+        """
+        Handle multiple issues in bulk using the Django ORM.
+        
+        Args:
+            issues (list): A list of CryptoIssue objects.
+        """
         existing_hashes = set(CryptoIssue.objects.filter(issue_hash__in=[i.issue_hash for i in issues]).values_list('issue_hash', flat=True))
         new_issues = [i for i in issues if i.issue_hash not in existing_hashes]
 
@@ -249,73 +327,33 @@ class CryptoAnalyzer:
                 CryptoIssue.objects.bulk_create(new_issues)
             except IntegrityError as e:
                 logger.error(f"IntegrityError during bulk create: {str(e)}", exc_info=True)
-    @sync_to_async
-    def _handle_issues(self, issues):
-        for issue in issues:
-            try:
-                # Use get_or_create to make sure it's a new issue
-                existing_issue, created = CryptoIssue.objects.get_or_create(
-                    issue_hash=issue.issue_hash,
-                    defaults={
-                        'repository': issue.repository,
-                        'file_path': issue.file_path,
-                        'line_number': issue.line_number,
-                        'issue_type': issue.issue_type,
-                        'description': issue.description,
-                        'code_snippet': issue.code_snippet,
-                        'recommendation': issue.recommendation,
-                        'severity': issue.severity,
-                    }
-                )
-                if not created:
-                    # Update the existing issue if needed
-                    existing_issue.checked_at = datetime.now()
-                    existing_issue.save()
-            except IntegrityError as e:
-                logger.error(f"IntegrityError while handling issue {issue.issue_hash}: {str(e)}", exc_info=True)
 
-    def _generate_hash(self, file_path, node):
-        """
-        Generates a unique hash for a file path and nod so there's no overlap/ duplicates
-        """
-        # Extract details to make a unique identifier for the issue
-        node_details = {
-            'file_path': file_path,
-            'line_number': getattr(node, 'lineno', 'unknown'),
-            'node_type': type(node).__name__,
-            'code_snippet': getattr(node, 's', '') if isinstance(node, ast.Str) else '',
-        }
-        
-        # Convert details to a JSON string for hashing
-        details_string = json.dumps(node_details, sort_keys=True)
-        
-        # Generate a hash
-        return hashlib.sha256(details_string.encode('utf-8')).hexdigest()
-
-
-
-
-    @sync_to_async
+    @sync_to_async  
     def _create_issue(self, repository, file_path, node, issue_type, description):
+        """
+        Create a new CryptoIssue object for a detected issue.
+        
+        Args:
+            repository (Repository): The repository where the issue was found.
+            file_path (str): The file path within the repository.
+            node (ast.AST): The AST node associated with the issue.
+            issue_type (str): The type of the issue.
+            description (str): A description of the issue.
+        
+        Returns:
+            CryptoIssue: The created CryptoIssue object, or None if the issue already exists.
+        """
         issue_hash = self._generate_hash(file_path, node)
         if CryptoIssue.objects.filter(issue_hash=issue_hash).exists():
             return None
 
-        # Extract line number
         line_number = getattr(node, 'lineno', 0)
-
-        # Extract code snippet (use AST node content for Python)
         code_snippet = (
             getattr(node, 's', None) if isinstance(node, ast.Str) else None
         ) or f"Code near line {line_number} in {file_path}"
-
-        # Generate recommendation based on issue type
         recommendation = self._get_recommendation(issue_type, code_snippet)
-
-        # Determine severity
         severity = self._get_severity(issue_type)
 
-        # Create and save the issue
         issue = CryptoIssue(
             repository=repository,
             file_path=file_path,
@@ -330,10 +368,38 @@ class CryptoAnalyzer:
         issue.save()
         return issue
 
+    def _generate_hash(self, file_path, node):
+        """
+        Generates a unique hash for a file path and node so there's no overlap.
 
+        Args:
+            file_path (str): The file path within the repository.
+            node (ast.AST): The AST node associated with the issue.
 
+        Returns:
+            str: The generated hash.
+        """
+        node_details = {
+            'file_path': file_path,
+            'line_number': getattr(node, 'lineno', 'unknown'),
+            'node_type': type(node).__name__,
+            'code_snippet': getattr(node, 's', '') if isinstance(node, ast.Str) else '',
+        }
+        
+        details_string = json.dumps(node_details, sort_keys=True)
+        return hashlib.sha256(details_string.encode('utf-8')).hexdigest()
 
     def _get_recommendation(self, issue_type, code_snippet):
+        """
+        Get the recommendation message for a specific issue type.
+        
+        Args:
+            issue_type (str): The type of the issue.
+            code_snippet (str): The relevant code snippet.
+        
+        Returns:
+            str: The recommendation message.
+        """
         recommendations = {
             'weak_cipher': f"The code uses a weak or deprecated cipher: {code_snippet}\nRecommendation: Use a strong, modern encryption algorithm like AES-256-GCM.",
             'hardcoded_secret': f"Hardcoded secret detected: {code_snippet}\nRecommendation: Store secrets securely using environment variables, a configuration management system, or a secrets management service. Avoid hardcoding secrets in the codebase.",
@@ -349,6 +415,15 @@ class CryptoAnalyzer:
         return recommendations.get(issue_type, 'Review and update the code following secure coding practices and industry standards. Consult OWASP guidelines, language-specific security resources, and up-to-date cryptography best practices.')
 
     def _get_severity(self, issue_type):
+        """
+        Get the severity level for a specific issue type.
+        
+        Args:
+            issue_type (str): The type of the issue.
+        
+        Returns:
+            str: The severity level (critical, high, medium, or low).
+        """
         severity_map = {
             'weak_cipher': 'high', 
             'hardcoded_secret': 'critical',
@@ -364,11 +439,18 @@ class CryptoAnalyzer:
         return severity_map.get(issue_type, 'low')
 
 
-
-
-
 class GitHubService:
+    """
+    Service class for interacting with the GitHub API.
+    """
+
     def __init__(self, token):
+        """
+        Initialize the GitHubService with a GitHub access token.
+        
+        Args:
+            token (str): The GitHub access token for making API requests.
+        """
         self.token = token
         self.session = requests.Session()
         self.headers = {
@@ -378,10 +460,13 @@ class GitHubService:
 
     def fetch_issues(self, repo_url):
         """
-        Fetch issues for a specific GitHub repository and cache the results.
-
-        :param repo_url: The full URL of the GitHub repository.
-        :return: List of issues for the repository.
+        Fetch issues for a GitHub repository.
+        
+        Args:
+            repo_url (str): The URL of the GitHub repository.
+        
+        Returns:
+            list: A list of issues fetched from the repository.
         """
         cache_key = f"github_issues_{repo_url}"
         cached_issues = cache.get(cache_key)
@@ -389,7 +474,7 @@ class GitHubService:
             logger.info(f"Using cached issues for repository {repo_url}.")
             return cached_issues
 
-        # Convert GitHub web URL to API URL
+        # Convert GitHub web URL to API URL 
         repo_name = repo_url.replace("https://github.com/", "")
         issues_url = f"https://api.github.com/repos/{repo_name}/issues"
 
@@ -416,6 +501,12 @@ class GitHubService:
         return issues_data
 
     def fetch_repositories(self):
+        """
+        Fetch trending repositories from GitHub.
+        
+        Returns:
+            list: A list of trending repositories fetched from GitHub.
+        """
         url = "https://api.github.com/search/repositories?q=is:open+issue&sort=created&order=desc"
         etag = cache.get('github_repos_etag')
         headers = self.headers.copy()
@@ -425,7 +516,7 @@ class GitHubService:
         logger.debug(f"Fetching repositories from {url} with headers: {headers}")
         response = self.session.get(url, headers=headers)
 
-        # Handle 304 Not Modified (cached data is up-to-date)
+        # Handle 304 
         if response.status_code == 304:
             logger.info("No changes detected. Using cached repositories.")
             cached_repos = cache.get('github_repositories')

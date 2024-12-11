@@ -5,11 +5,11 @@ from django.shortcuts import redirect
 from hashlib import sha256
 from django.utils.http import urlsafe_base64_encode
 
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils.timezone import now
 
 class Repository(models.Model):
+    """
+    Represents a code repository.
+    """
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -69,6 +69,9 @@ class Repository(models.Model):
 
 
 class GitHubRepository(models.Model):
+    """
+    Represents a GitHub repository.
+    """
     url = models.URLField(unique=True)  # Store the full GitHub repository URL
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
@@ -95,7 +98,11 @@ class GitHubRepository(models.Model):
     def __str__(self):
         return self.name
 
+
 class Comment(models.Model):
+    """
+    Represents a comment on a repository.
+    """
     repository = models.ForeignKey(Repository, related_name="comments", on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
@@ -145,6 +152,9 @@ class Comment(models.Model):
 
 
 class CachedGitHubRepository(models.Model):
+    """
+    Represents a cached GitHub repository.
+    """
     owner = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -166,7 +176,11 @@ class CachedGitHubRepository(models.Model):
             return urlsafe_base64_encode(raw_name.encode()) 
         return ""
 
+
 class CryptoIssue(models.Model):
+    """
+    Represents a crypto-related issue in a repository.
+    """
     repository = models.ForeignKey('Repository', on_delete=models.CASCADE, related_name='issues')
     file_path = models.CharField(max_length=255)
     line_number = models.IntegerField()
@@ -186,25 +200,26 @@ class CryptoIssue(models.Model):
     issue_hash = models.CharField(max_length=64, unique=True, default='')
     checked_at = models.DateTimeField(null=True, blank=True)
     code_snippet = models.TextField() 
+
     def save(self, *args, **kwargs):
         # Generate issue hash if not set
         if not self.issue_hash:
             data = f"{self.repository_id}:{self.file_path}:{self.line_number}:{self.issue_type}"
             self.issue_hash = sha256(data.encode('utf-8')).hexdigest()
 
-
         if CryptoIssue.objects.filter(issue_hash=self.issue_hash).exists():
-
             return
 
         super().save(*args, **kwargs)  # Call the parent save method if no duplicates
 
     def __str__(self):
         return f"{self.repository.full_name} - {self.issue_type} at {self.file_path}:{self.line_number}"
-    def __str__(self):
-        return f"{self.owner}/{self.name}"
+
 
 class CVE(models.Model):
+    """
+    Represents a Common Vulnerabilities and Exposures (CVE) entry.
+    """
     nvd_issue = models.ForeignKey(CryptoIssue, on_delete=models.CASCADE)
     cve_id = models.CharField(max_length=20)
     description = models.TextField()
@@ -213,7 +228,11 @@ class CVE(models.Model):
     def __str__(self):
         return self.cve_id
 
+
 class Message(models.Model):
+    """
+    Represents a message associated with a repository.
+    """
     repository = models.ForeignKey(Repository, on_delete=models.CASCADE)
     user = models.CharField(max_length=100)
     content = models.TextField()
@@ -222,7 +241,11 @@ class Message(models.Model):
     def __str__(self):
         return f"{self.user} - {self.repository.name}"
 
+
 class IssueReport(models.Model):
+    """
+    Represents an issue report for a repository.
+    """
     repository = models.ForeignKey(Repository, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
